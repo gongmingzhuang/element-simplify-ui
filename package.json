@@ -1,0 +1,33 @@
+{
+  "name": "element-simplify-ui",
+  "version": "1.0.9",
+  "description": "基于element-ui 进行二次简化封装",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gongmingzhuang/es-ui.git"
+  },
+  "keywords": [
+    "element-ui",
+    "secondary-encapsulation"
+  ],
+  "author": "gongmingzhuang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gongmingzhuang/es-ui/issues"
+  },
+  "homepage": "https://github.com/gongmingzhuang/es-ui#readme",
+  "devDependencies": {
+    "assert": "^2.0.0",
+    "gulp": "^4.0.2",
+    "gulp-bump": "^3.2.0",
+    "mocha": "^8.3.2"
+  },
+  "dependencies": {
+    "element-ui": "^2.15.1",
+    "vue": "^2.6.12"
+  }
+}
