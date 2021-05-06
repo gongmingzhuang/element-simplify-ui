@@ -1,13 +1,21 @@
 
 import EsButton from "../packages/button/index"
+import EsButtonGroup from "../packages/button-group/index"
+import EsCrumb from "../packages/crumb/index"
 import EsMenu from "../packages/menu/index"
+import EsQuery from "../packages/query/index"
+import EsTabs from "../packages/tabs/index"
 import 'element-ui/lib/theme-chalk/index.css'
 import '../lib/css/public.css'
 import ElementUI from 'element-ui'
 
 const components = [
   EsButton,
-  EsMenu
+  EsButtonGroup,
+  EsCrumb,
+  EsMenu,
+  EsQuery,
+  EsTabs
 ]
 
 const install = Vue => {
