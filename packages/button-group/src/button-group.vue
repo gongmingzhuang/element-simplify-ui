@@ -14,7 +14,7 @@
         :icon="item[listSetting.icon || 'icon']"
         :autofocus="item[listSetting.autofocus || 'autofocus']"
         :native-type="item[listSetting.nativeType || 'nativeType']"
-        @click="$parent[item[listSetting.clickEvent || 'clickEvent']]()"
+        @click="parent[item[listSetting.clickEvent || 'clickEvent']] ? parent[item[listSetting.clickEvent || 'clickEvent']]() : $emit('query-event', item.default) "
       >
         <!-- @click="handelClick(item[listSetting.clickEvent || 'clickEvent'])" -->
         <slot>{{ item[listSetting.buttonName || 'buttonName'] }}</slot>
@@ -30,6 +30,7 @@
  * - 1. 通过extends 可直接继承子组件的props 变量
  * - 2. 通过$parent[clickEvent] 可让子组件调用父级组件中定义的方法
  * - 3. 通过visible 控制组件的显示隐藏
+ * - 4. [upg] 点击事件可以通过[query-event] 设置全局公用事件，在同时设置item 事件时，优先调用item 事件
  */
 import EsButton from '../../button/src/button'
 export default {
@@ -62,6 +63,13 @@ export default {
           visible: 'visible', // boolean
           clickEvent: 'clickEvent'
         }
+      }
+    },
+    // 上级父类
+    parent: {
+      type: Object,
+      default(){
+        return this.$parent
       }
     }
   },

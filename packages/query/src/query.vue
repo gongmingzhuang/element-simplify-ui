@@ -2,15 +2,32 @@
   <div class="es-query">
     <el-form ref="form" :model="queryForm">
       <template v-for="(item, index) of queryList">
-        <template v-if="item.type=='text'">
           <el-form-item
-            :label="item.label"
+            :label="showLabel && item.label"
+            :label-width="labelWidth || item.labelWidth"
             :key="index"
             :prop="item.prop"
           >
-            <el-input v-model="queryForm[item.prop]"></el-input>
+            <!-- 输入框 -->
+            <template v-if="item.type=='text' || !item.type">
+              <el-input v-model.trim="queryForm[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength"></el-input>
+            </template>
+            <!-- 日期选择框 -->
+            <template v-if="item.type=='dateRange'">
+              <el-date-picker @change="date => {dateFormatting(date, item)}"
+                            v-model="queryFormDate[item.prop]"
+                            :format="item.format||'yyyy-MM-dd'"
+                            :value-format="item.valueFormat||'yyyy-MM-dd HH:mm:ss'"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"/>
+            </template>
+            <!-- 下拉框 -->
+            <template v-if="item.type=='select'">
+              <el-input v-model.trim="queryForm[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength"></el-input>
+            </template>
           </el-form-item>
-        </template>
       </template>
     </el-form>
     <es-button-group
@@ -37,6 +54,11 @@ export default {
     EsButtonGroup,
   },
   props: {
+    // [20210518][upg]
+    showLabel: {
+      type: Boolean,
+      default: true
+    },
     // 数组
     queryList: {
       type: Array,
@@ -75,12 +97,18 @@ export default {
   },
   data(){
     return{
-      queryForm: {}
+      queryForm: {},
+      // [20210518][crt] 日期控件临时对象
+      queryFormDate: {}
     }
   },
   created() {
     this.queryList.forEach(item=>{
-      this.$set(this.queryForm, item.prop, '');
+      if(item.type == 'dateRange'){
+        this.$set(this.queryFormDate, item.prop, '');
+      }else{
+        this.$set(this.queryForm, item.prop, '');
+      }
     })
   },
   methods: {
@@ -89,9 +117,43 @@ export default {
     },
     reset(){
       this.$refs['form'].resetFields();
+      // [20210518][upd] 重置日期
+      this.queryList.forEach(item=>{
+        if(item.type == 'dateRange'){
+          this.queryFormDate[item.prop] = []
+          this.queryForm[item.props[0]] = ''
+          this.queryForm[item.props[1]] = ''
+        }
+      })
+    },
+    // [20210518][crt] 日期格式化
+    dateFormatting(date, item){
+      if(!date){
+        this.queryForm[item.prop] = ''
+        this.queryForm[item.props[0]] = ''
+        this.queryForm[item.props[1]] = ''
+        return
+      }
+      this.queryForm[item.props[0]] = date[0].split(' ')[0]
+      this.queryForm[item.props[1]] = date[1].split(' ')[0]
     }
   }
 }
 </script>
 <style>
+.es-query .el-form{
+  display: flex;
+  flex-wrap: wrap;
+}
+.es-query .el-form .el-form-item{
+  display: flex;
+}
+.es-query .el-form-item__content{
+  margin-left: 0 !important;
+}
+.es-query .es-button-group{
+  justify-content: flex-end;
+  padding-right: 14px;
+  padding-bottom: 14px;
+}
 </style>

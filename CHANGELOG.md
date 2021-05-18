@@ -77,3 +77,22 @@
 - 通过[button-list] 配置查询/重置按钮，默认自带
 
 
+# [1.0.16][20210518]
++ [upd] <es-crumb> 组件
+- 新增prop[button-event-invoke-body]，用于传入给其子组件<es-button-group> 作为事件调用时查找父类组件中的事件
+- 修改<es-crumb> 组件默认宽度样式为100%
+
++ [upd] <es-button-group>
+- 新增prop[parent]，接收事件调用的父类，如果在嵌套结构中使用<es-button-group> 最好指定该值，否则无法正确调用对应事件函数
+- 点击事件可以通过[query-event] 设置全局公用事件，在同时设置item 事件时，优先调用item 事件
+
++ [upd] <es-query>
+- 支持日期范围选择功能
+- 通过[query-list] item中[labelWidth] 属性单独设置label 狂赌，也可以通过[label-width] 可统一设置label 宽度
+
++ [crt] 添加<es-table> 表格组件
+- 组件快捷过滤按钮、右侧辅助按钮通过调用<es-button-group> 组件实现
+- [quick-filter-setting] [quick-filter] 设置列表快捷条件过滤查询
+- [extra-operate-setting] [extra-operate] 设置列表右侧辅助功能按钮
+- 配置[quick-filter] 时，最好配置@query-event 供快捷按钮调用事件
+- [quick-filter] [extra-operate] 数组属性同<es-button-group>，注：[quick-filter] item 新增属性[default(Object)] 用于传递快捷过滤按钮条件

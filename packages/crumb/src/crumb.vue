@@ -20,9 +20,11 @@
       </el-breadcrumb>
     </div>
     <div class="es-crumb-right">
+      <!-- <slot name="button-group"></slot> -->
       <es-button-group
         :list-setting="buttonListSetting"
         :button-list="buttonList"
+        :parent="buttonEventInvokeBody"
       />
     </div>
   </div>
@@ -89,6 +91,13 @@ export default {
           clickEvent: 'clickEvent',
         }
       }
+    },
+    // [20210517][upd]
+    buttonEventInvokeBody: {
+      type: Object,
+      default: ()=>{
+        return this.$parent
+      }
     }
   },
 }
@@ -98,5 +107,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 </style>
