@@ -93,7 +93,13 @@ export default {
           clickEvent: 'clickEvent',
         }
       }
-    }
+    },
+    pagerSetting: {
+      type: Object,
+      default: () => {
+        return {currentPage: "currentPage"}
+      }
+    },
   },
   data(){
     return{
@@ -112,8 +118,12 @@ export default {
     })
   },
   methods: {
+      // [20210520][upd] 在点击查询/重置按钮时，重置当前分页
     query(){
-      this.$emit('query-event', this.queryForm);
+      let _param = {}
+      _param[this.pagerSetting['currentPage'] || 'currentPage'] = 1
+      Object.assign(_param, this.queryForm)
+      this.$emit('query-event', _param);
     },
     reset(){
       this.$refs['form'].resetFields();
@@ -125,6 +135,7 @@ export default {
           this.queryForm[item.props[1]] = ''
         }
       })
+      this.query()
     },
     // [20210518][crt] 日期格式化
     dateFormatting(date, item){
@@ -141,9 +152,15 @@ export default {
 }
 </script>
 <style>
+.es-query{
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
+}
 .es-query .el-form{
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 .es-query .el-form .el-form-item{
   display: flex;

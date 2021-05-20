@@ -108,5 +108,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
 }
 </style>

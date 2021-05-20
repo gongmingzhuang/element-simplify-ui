@@ -83,6 +83,12 @@ export default {
         }
       },
     },
+    pagerSetting: {
+      type: Object,
+      default: () => {
+        return {currentPage: "currentPage"}
+      }
+    },
     // 上级父类
     parent: {
       type: Object,
@@ -100,8 +106,12 @@ export default {
     // @param {object} item - 按钮对象
     // @param {number} index - 当前点击按钮索引
     // @param {object} e - 当前点击元素对象
+    // [20210520][upd] 在点击快捷过滤按钮时，重置当前分页
     handelClick(item, index, e) {
-      this.$emit('query-event', item.default)
+      let _param = {}
+      _param[this.pagerSetting['currentPage' || 'currentPage']] = 1
+      Object.assign(_param, item.default)
+      this.$emit('query-event', _param)
       this.changeButtonActive(e, item, index)
     },
     // [20210519][crt] 通过原生dom 操作实现，切换快捷过滤按钮选中状态

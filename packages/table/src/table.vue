@@ -13,6 +13,7 @@
             v-on="$listeners"
             :list-setting="quickFilterSetting"
             :button-list="quickFilter"
+            :pager-setting="pagerSetting"
             :parent="$parent"
           />
           </ul>
@@ -27,38 +28,49 @@
       </div>
       <div class="es-table-main">
         <el-table
-          :data="data"
           style="width: 100%;"
+          :data="data"
+          v-bind="$attrs"
+          v-on="$listeners"
+          
         >
           <template v-for="(item, index) in tableColumns">
             <el-table-column
-              v-if="!item.fixed"
+              v-if="item.type=='selection'"
+              label-class-name="selection-label"
+              type="selection"
+              :align="item.align||'center'"
+              :width="item.width||''">
+              </el-table-column>
+            <el-table-column
+              v-else-if="!item.fixed"
               :label="item.label"
               :prop="item.prop"
               :width="item.width||''"
               :align="item.align||'center'"
+              :show-overflow-tooltip="item.showOverflowTooltip||false"
               :key="'table'+index"
             >
-            <template slot-scope="{row}">
-              <!-- 状态值解析 -->
-              <template v-if="item.translate">
-                {{item.translate[row[item.prop]] || item.translate['default']}}
-              </template>
-              <!-- 日期格式化 -->
-              <template v-else-if="item.dateFormat">
-                {{$moment(row[item.prop]).format((item.dateFormat === 1 || item.dateFormat === true) ? 'YYYY-MM-DD HH:mm:ss' : item.dateFormat)}}
-              </template>
-              <!-- 金额格式化 -->
-              <template v-else-if="item.moneyFormat">
-                <template v-if="row[item.prop] || row[item.prop] === 0 || row[item.prop] === '0'">
-                  {{UTILS.moneyFormat(row[item.prop], item.moneyFormat.decimal || '')}}
+              <template slot-scope="{row}">
+                <!-- 状态值解析 -->
+                <template v-if="item.translate">
+                  {{item.translate[row[item.prop]] || item.translate['default']}}
+                </template>
+                <!-- 日期格式化 -->
+                <template v-else-if="item.dateFormat">
+                  {{$moment(row[item.prop]).format((item.dateFormat === 1 || item.dateFormat === true) ? 'YYYY-MM-DD HH:mm:ss' : item.dateFormat)}}
+                </template>
+                <!-- 金额格式化 -->
+                <template v-else-if="item.moneyFormat">
+                  <template v-if="row[item.prop] || row[item.prop] === 0 || row[item.prop] === '0'">
+                    {{UTILS.moneyFormat(row[item.prop], item.moneyFormat.decimal || '')}}
+                  </template>
+                </template>
+                <!-- 默认 -->
+                <template v-else>
+                  {{row[item.prop]}}
                 </template>
               </template>
-              <!-- 默认 -->
-              <template v-else>
-                {{row[item.prop]}}
-              </template>
-            </template>
             </el-table-column>
             <el-table-column
               v-else
@@ -67,7 +79,6 @@
               :width="item.width||''"
               :align="item.align||'center'"
               :fixed="item.fixed||''"
-              show-overflow-tooltip
               :key="'table'+index"
             >
               <template slot-scope="scope">
@@ -82,7 +93,18 @@
           </template>
         </el-table>
       </div>
-      <div class="es-table-pager"></div>
+      <div class="es-table-pager">
+        <el-pagination
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+          :current-page="pager[pagerSetting['currentPage'] || 'currentPage']"
+          :page-sizes="pagerSetting['pageSizeArray'] || [10, 20, 50]"
+          :page-size="pager[pagerSetting['pageSize'] || 'pageSize']"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="pager[pagerSetting['total'] || 'total']"
+        >
+        </el-pagination>
+      </div>
     </main>
   </div>
 </template>
@@ -97,7 +119,7 @@ import { Table } from 'element-ui'
 import UTILS from '../../../util/util.js'
 import EsButtonGroup from '../../button-group/src/button-group'
 export default {
-  extends: Table,
+  // extends: Table,
   name: 'EsTable',
   components: {
     EsButtonGroup,
@@ -168,6 +190,29 @@ export default {
       type: Array,
       default: () => [],
     },
+    pagerSetting: {
+      type: Object,
+      default: () => {
+        return {
+          currentPage: "currentPage",
+          pageSize: "pageSize",
+          total: "total",
+          pageSizeArray: [10, 20, 50]
+        }
+      }
+    },
+    // 列表字段数据组
+    pager: {
+      type: Object,
+      default: () => {
+        return{
+          currentPage: 1,
+          pageSize: 10,
+          totalPage: 0,
+          total: 0
+        }
+      },
+    },
     // 按钮组
     tableOperate: {
       type: Array,
@@ -194,9 +239,27 @@ export default {
       },
     },
   },
-  data(){
+  data() {
     return {
-      UTILS
+      UTILS,
+    }
+  },
+  methods: {
+    // [20210520][crt] 分页
+    handleCurrentChange(currentPage){
+      let _param = {}
+      _param[this.pagerSetting['currentPage'] || 'currentPage'] = currentPage
+      this.$emit('query-event', _param)
+    },
+    // [20210520][crt] 分页
+    handleSizeChange(pageSize){
+      let _param = {}
+      _param[this.pagerSetting['currentPage'] || 'currentPage'] = 1
+      _param[this.pagerSetting['pageSize'] || 'pageSize'] = pageSize
+      this.$emit('query-event', _param)
+    },
+    handleSelectionChange(selectedItems){
+      debugger
     }
   }
 }
@@ -230,9 +293,15 @@ export default {
   display: flex;
   justify-content: center;
 }
-.es-table table,
-.es-table .el-table__fixed,
-.es-table .el-table__empty-block {
-  /* width: 100% !important; */
+
+.es-table .es-table-pager{
+  text-align: center;
+  margin-top: 10px;
 }
+
+th>.selection-label::after{
+  content: "全选";
+  margin-left: 8px;
+}
+
 </style>

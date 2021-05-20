@@ -120,3 +120,70 @@
 - visible 属性，可见参数配置由原Boolean 扩展支持Array 传入判断按钮显示/隐藏；
 - 追加不可见参数配置invisible ，同visible属性；
 - visible/invisible 值类型为Array 时通过执行相应方法checkVisible/checkInvisible 进行判断显示/隐藏；
+
+# [1.0.18][20210520]
+1. `<es-table>` 组件
+- [del] 由于继承会出现错误提示`Error in mounted hook: "TypeError: Cannot read property 'addEventListener' of undefined`，故移除`<el-table>` 继承关系；
+- [add] 添加完善分页插件`<el-pagination>`，集成到`<es-table>` 组件中，通过[pager-setting] 设置请求时用的“currentPage”、“pageSize” 字段名；
+```html
+  <es-table
+    :pager-setting="{
+      currentPage: 'pageNum'
+    }"
+  >
+```
+- [upd] 列表数据、分页通过通过[data]、[pager] 进行传递；
+- [upg] `<el-table>` 通过v-bind='$attrs'、v-on='$listeners' 设置，可以在`<es-table>` 直接使用`<el-table>` 属性和方法；
+- [upd] 条件查询、快捷过滤查询、分页查询统一通过通过“query-event” 配置回调函数执行，故需要设置变量（queryParams）接收不同方式回传的参数，再通过Object.assign 进行整合触发查询；
+- [crt] 添加复选框选择功能，通过`<el-table>` 同名方法@selection-change 在当前组件中进行捕捉选中数据；
+- 示例
+```html
+    <es-table
+      @query-event="getList"
+      @selection-change="handleSelectionChange"
+      :quick-filter="[
+        {buttonName: '全部', type:'primary', default: { status: ''}},
+        {buttonName: '已生效', default: { status: 1}},
+        {buttonName: '未生效', default: { status: 2}},
+        {buttonName: '禁用', default: { status: 3}}
+      ]"
+      :extra-operate="[
+        { buttonName: '选择子公司', size: 'mini', clickEvent: 'addEnterprise' },
+        { buttonName: '返回上一级', size: 'mini', clickEvent: 'stackBack' }
+      ]"
+      :table-columns="[
+        { label: '', prop: 'eid', type: 'selection', width: 100 },
+        { label: '企业名称', prop: 'companyName', width: 200 },
+        { label: '信用代码', prop: 'businessLicenseCode', width: 250 },
+        { label: '已开通服务', prop: 'capitalNames' },
+        { label: '状态', prop: 'status', translate: status() },
+        { label: '审批状态', prop: 'approveStatus', translate: approveStatus() },
+        { label: '企业来源', prop: 'companyFrom', translate: companyFrom() },
+        { label: '子公司数', prop: 'sonNumber', width: 90, moneyFormat: 1 },
+        { label: '创建时间', prop: 'createTime', width: 170, dateFormat: 1 },
+        { label: '创建人', prop: 'createOperator' },
+        { label: '操作', prop: 'oprationToll', width: 570, fixed: 'right' }
+      ]"
+      :table-operate="[
+        { buttonName: '查看', size: 'mini', clickEvent: 'addEnterprise' },
+        { buttonName: '编辑', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '设置管理员', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '子公司', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '重置密码', size: 'mini', clickEvent: 'handleClick', visible: /重置密码/.test(btnJur) },
+        { buttonName: '启用', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '禁用', size: 'mini', clickEvent: 'handleClick', invisible: [/禁用/.test(btnJur), {status: 0, companyFrom: 'HRM'}] }
+      ]"
+      :pager-setting="{
+        currentPage: 'pageNum'
+      }"
+      :data="tableData.data"
+      :pager="tableData.pager"
+      size="mini"
+    >
+      <template slot="title">企业列表（{{tableData.pager.total}}）</template>
+    </es-table>
+```
+
+
+2. `<es-query>` 组件
+- [upg] `<es-query>` 条件查询控件，“查询”、“重置”功能会重置当前分页参数{currentPage: 1}；若分页参数值非默认值“currentPage”，可通过[pagerSetting] 进行配置；
