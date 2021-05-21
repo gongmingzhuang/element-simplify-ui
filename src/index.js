@@ -2,6 +2,9 @@
 import EsButton from "../packages/button/index"
 import EsButtonGroup from "../packages/button-group/index"
 import EsCrumb from "../packages/crumb/index"
+import EsDialog from "../packages/dialog/index"
+import EsDialogForm from "../packages/dialog-form/index"
+import EsForm from "../packages/form/index"
 import EsMenu from "../packages/menu/index"
 import EsQuery from "../packages/query/index"
 import EsTable from "../packages/table/index"
@@ -14,6 +17,9 @@ const components = [
   EsButton,
   EsButtonGroup,
   EsCrumb,
+  EsDialog,
+  EsDialogForm,
+  EsForm,
   EsMenu,
   EsQuery,
   EsTable,

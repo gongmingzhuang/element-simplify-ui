@@ -27,7 +27,10 @@
         :icon="item[listSetting.icon || 'icon']"
         :autofocus="item[listSetting.autofocus || 'autofocus']"
         :native-type="item[listSetting.nativeType || 'nativeType']"
-        @click="parent[item[listSetting.clickEvent || 'clickEvent']] ? parent[item[listSetting.clickEvent || 'clickEvent']](scope) : handelClick(item, index, $event) "
+        @click="parent[item[listSetting.clickEvent || 'clickEvent']] ?
+         parent[item[listSetting.clickEvent || 'clickEvent']](scope, $parent) :
+         item.assignCurrentParent ? current[item.clickEvent || 'clickEvent']() :
+         handelClick(item, index, $event) "
       >
         <!-- @click="handelClick(item[listSetting.clickEvent || 'clickEvent'])" -->
         <slot>{{ item[listSetting.buttonName || 'buttonName'] }}</slot>
@@ -55,7 +58,7 @@ export default {
     // [20210519][crt] 行操作传值-当前行
     scope: {
       type: Object,
-      default: ()=>{}
+      default: () => {},
     },
     // 数组
     buttonList: {
@@ -86,18 +89,25 @@ export default {
     pagerSetting: {
       type: Object,
       default: () => {
-        return {currentPage: "currentPage"}
-      }
+        return { currentPage: 'currentPage' }
+      },
     },
-    // 上级父类
+    // 上级父类-页面组件类
     parent: {
       type: Object,
       default() {
         return this.$parent
       },
     },
+    // 上级父类-调用组件类
+    current: {
+      type: Object,
+      default() {
+        return this
+      },
+    },
   },
-  created(){
+  created() {
     // console.log(">>>>....")
     // console.log(this.buttonList)
   },
@@ -144,15 +154,15 @@ export default {
       }
     },
     // [20210519][crt] 判断行按钮是否可见
-    checkVisible(scope, visible){
+    checkVisible(scope, visible) {
       let _visible = true
-      visible.forEach(item=>{
-        if(!item){
+      visible.forEach((item) => {
+        if (!item) {
           _visible = false
         }
-        if(typeof(item)=='object'){
-          for(let key in item){
-            if(scope.row[key] != item[key]){
+        if (typeof item == 'object') {
+          for (let key in item) {
+            if (scope.row[key] != item[key]) {
               _visible = false
             }
           }
@@ -161,22 +171,22 @@ export default {
       return _visible
     },
     // [20210519][crt] 判断行按钮是否不可见
-    checkInvisible(scope, invisible){
+    checkInvisible(scope, invisible) {
       let _invisible = false
-      invisible.forEach(item=>{
-        if(!item){
+      invisible.forEach((item) => {
+        if (!item) {
           _invisible = true
         }
-        if(typeof(item)=='object'){
-          for(let key in item){
-            if(scope.row[key] != item[key]){
+        if (typeof item == 'object') {
+          for (let key in item) {
+            if (scope.row[key] != item[key]) {
               _invisible = true
             }
           }
         }
       })
       return _invisible
-    }
+    },
   },
 }
 </script>

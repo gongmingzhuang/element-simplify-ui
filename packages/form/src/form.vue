@@ -1,5 +1,5 @@
 <template>
-  <div class="es-query">
+  <div class="es-form">
     <el-form ref="form" :model="queryForm">
       <template v-for="(item, index) of queryList">
           <el-form-item
@@ -38,7 +38,7 @@
 </template>
 <script>
 /**
- * [20210506][crt]
+ * [20210521][crt]
  * @author: gongmingzhuang
  *
  * - 1. 通过extends 可直接继承<el-form> 的props 变量
@@ -49,7 +49,7 @@ import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
 export default {
   extends: Form,
-  name: 'EsQuery',
+  name: 'EsForm',
   components: {
     EsButtonGroup,
   },

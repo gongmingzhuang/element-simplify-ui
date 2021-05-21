@@ -25,6 +25,7 @@
         :list-setting="buttonListSetting"
         :button-list="buttonList"
         :parent="buttonEventInvokeBody"
+        :current="this"
       />
     </div>
   </div>

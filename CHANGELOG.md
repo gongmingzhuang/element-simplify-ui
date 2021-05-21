@@ -187,3 +187,111 @@
 
 2. `<es-query>` 组件
 - [upg] `<es-query>` 条件查询控件，“查询”、“重置”功能会重置当前分页参数{currentPage: 1}；若分页参数值非默认值“currentPage”，可通过[pagerSetting] 进行配置；
+
+
+# [1.0.19][20210521]
+1. `<es-query>` 组件
+- [upd] 需隐藏搜索栏label 时，可配置[label-width] 为0、''；
+
+2. `<es-button-group>` 组件
+- [upg] 添加调用调用组件中方法的this 指向配置[current]，通过[button-list] item 配置“assignCurrentParent=true” 开启；
+- 说明1：“assignCurrentParent=true” 后，上级组件（非当前页面组件）必需有“clickEvent=*** ”同名方法；
+- 说明2：只有`<es-button-group>`组件非当前页面组件直接上级组件（例：`<es-dialog-form>`）才需配置；
+
+3. `<es-dialog>` 弹窗组件
+- [init] 新增组件，通过v-on、v-bind 进行属性及事件传递；
+- [crt] 通过[title] 配置弹窗标题，[tips] 配置弹窗提示消息，[button-list]、[button-list-setting] 配置弹窗交互按钮；
+- 说明1：页面组件通过方法`this.$refs[esDialogRef].open()`触发弹窗弹出；
+
+4. `<es-dialog-form>` 弹窗表单组件
+- [init] 新增组件，v-on、v-bind 进行`<el-form>` 自带属性和事件传递，通过props 对新增自定义属性及事件进行传递；
+- [crt] [form-columns] 配置表单字段，详见示例；
+- [crt] [button-list] 配置弹窗按钮，详见示例；
+- [crt] [title] 配置弹窗标题，[labelWidth] 配置form-item label 宽度；
+- [crt] [validate-custom-list] 配置自定义表单校验规则，详见示例；
+- [crt] [@submit-event] 组件内自带表单提交事件回调（校验成功后），详见示例；
+- 说明1：页面组件通过方法`this.$refs[dialogRef].open()`触发弹窗弹出；
+- 说明2：组件内自带表单提交方法（Function submit），需要配置按钮“clickEvent=submit” 且“assignCurrentParent=true”，才可触发；
+- 说明3：若不使用组件内提交方法，可通过`this.$refs[dialogRef].$refs.form` 获取form 对象，可执行交校验并触发提交；
+
+```javascript
+/*
+<es-dialog-form
+      // $ref
+      ref="esDialogForm" 
+      // 弹窗标题
+      title="收获地址"
+      // label 宽度
+      labelWidth="100px"
+      // 组件内值提交事件回调，Function(form)
+      @submit-event="submitDialogForm"
+      // 表单字段
+      :form-columns="[
+        { label: '企业名称', prop: 'companyName', width: 200, validate: ['v-required'] },
+        { label: '信用代码', prop: 'businessLicenseCode', width: 250, validate: ['v-required', 'v-email'] },
+        { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-number'] },
+        { label: '密码', prop: 'pwd', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
+        { label: '确认密码', prop: 'rpwd', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+      ]"
+      // 弹窗按钮
+      :button-list="[
+        { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
+        { buttonName: '确定', clickEvent: 'submit', assignCurrentParent: true }
+      ]"
+      // 自定义校验规则
+      :validate-custom-list="[
+        { validName: 'v-number', 
+          validator: function(item){
+            return{
+              validator: validNumber(item),
+              trigger: ['blur', 'change']
+            }
+          }
+        }
+      ]"
+/>
+*/
+
+/** 表单字段 - [formColumns]
+ * label: 字段名
+ * prop：字段
+ * width：已失效，统一按labelWidth 配置
+ * validate: 校验规则
+ * dependPropIndex：两个相依赖字段相互校验索引标识
+ * 说明1：目前系统支持校验有：v-required（必填）、v-email（邮箱）、v-number（数字）、v-compare（依赖-主）、v-comdepend（依赖-辅）；
+ */
+formColumns = [
+  { label: '企业名称', prop: 'companyName', width: 200, validate: ['v-required'] },
+  { label: '信用代码', prop: 'businessLicenseCode', width: 250, validate: ['v-required', 'v-email'] },
+  { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-number'] },
+  { label: '密码', prop: 'pwd', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
+  { label: '确认密码', prop: 'rpwd', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+]
+
+/** 弹窗按钮 - [buttonList]
+ * buttonName：按钮名
+ * type：按钮样式，对标element-ui 按钮配色type
+ * size：按钮样式，对标element-ui 按钮样式size
+ * clickEvent：按钮触发事件，默认为当前页面中声明事件
+ * assignCurrentParent：触发组件内事件开关，当开启时，按钮触发事件为组件内配置名为clickEvent 事件
+ */
+buttonList = [
+  { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
+  { buttonName: '确定', clickEvent: 'submit', assignCurrentParent: true }
+]
+
+/** 自定义校验规则 - [validateCustomList]
+ * validName：校验规则名，在formColumns 中对应字段validate 数组中使用
+ * validator：校验规则，方法返回校验对象{validator，trigger}
+ */
+validateCustomList = [
+  { validName: 'v-number', 
+    validator: function(item){
+      return{
+        validator: validNumber(item),
+        trigger: ['blur', 'change']
+      }
+    }
+  }
+]
+```
