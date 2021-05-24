@@ -1,37 +1,14 @@
 <template>
   <div class="es-query">
-    <el-form ref="form" :model="queryForm">
-      <template v-for="(item, index) of queryList">
-          <el-form-item
-            :label="!labelWidth ? '' : (showLabel && item.label)"
-            :label-width="labelWidth || item.labelWidth"
-            :key="index"
-            :prop="item.prop"
-          >
-            <!-- 输入框 -->
-            <template v-if="item.type=='text' || !item.type">
-              <el-input v-model.trim="queryForm[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength"></el-input>
-            </template>
-            <!-- 日期选择框 -->
-            <template v-if="item.type=='dateRange'">
-              <el-date-picker @change="date => {dateFormatting(date, item)}"
-                            v-model="queryFormDate[item.prop]"
-                            :format="item.format||'yyyy-MM-dd'"
-                            :value-format="item.valueFormat||'yyyy-MM-dd HH:mm:ss'"
-                            type="daterange"
-                            range-separator="至"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期"/>
-            </template>
-            <!-- 下拉框 -->
-            <template v-if="item.type=='select'">
-              <el-input v-model.trim="queryForm[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength"></el-input>
-            </template>
-          </el-form-item>
-      </template>
-    </el-form>
+    <es-form 
+      ref="form"
+      v-bind="$attrs"
+      v-on="$listeners"
+      is-query-form
+    />
     <es-button-group
-      :list-setting="buttonListSetting"
+      v-bind="$attrs"
+      v-on="$listeners"
       :button-list="buttonList"
     />
   </div>
@@ -41,28 +18,24 @@
  * [20210506][crt]
  * @author: gongmingzhuang
  *
- * - 1. 通过extends 可直接继承<el-form> 的props 变量
- * - 2. 通过queryList 数组生成queryForm 表单对象
- * - 3. 通过$emit 将表单传递给父组件调用查询
+ * - 1. 通过<es-form>\<es-button-group> 实现
+ * - 2. 查询/重置功能，通过调用<es-form> 中方法实现
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
+import EsForm from '../../form/src/form'
 export default {
-  extends: Form,
+  // extends: Form,
   name: 'EsQuery',
   components: {
     EsButtonGroup,
+    EsForm
   },
   props: {
     // [20210518][upg]
     showLabel: {
       type: Boolean,
       default: true
-    },
-    // 数组
-    queryList: {
-      type: Array,
-      required: true,
     },
     // 按钮组
     buttonList: {
@@ -74,26 +47,6 @@ export default {
         ]
       },
     },
-    buttonListSetting: {
-      type: Object,
-      default: () => {
-        return {
-          size: 'size',
-          type: 'type',
-          plain: 'plain',
-          round: 'round',
-          circle: 'circle',
-          loading: 'loading',
-          disabled: 'disabled',
-          icon: 'icon',
-          autofocus: 'autofocus',
-          buttonName: 'buttonName',
-          nativeType: 'nativeType',
-          visible: 'visible', // boolean
-          clickEvent: 'clickEvent',
-        }
-      }
-    },
     pagerSetting: {
       type: Object,
       default: () => {
@@ -102,51 +55,24 @@ export default {
     },
   },
   data(){
-    return{
-      queryForm: {},
-      // [20210518][crt] 日期控件临时对象
-      queryFormDate: {}
-    }
+    return{}
   },
-  created() {
-    this.queryList.forEach(item=>{
-      if(item.type == 'dateRange'){
-        this.$set(this.queryFormDate, item.prop, '');
-      }else{
-        this.$set(this.queryForm, item.prop, '');
-      }
-    })
-  },
+  created() {},
   methods: {
       // [20210520][upd] 在点击查询/重置按钮时，重置当前分页
+      // [20210524][upg] 调用<es-form> submit 方法进行查询
     query(){
       let _param = {}
       _param[this.pagerSetting['currentPage'] || 'currentPage'] = 1
-      Object.assign(_param, this.queryForm)
-      this.$emit('query-event', _param);
+      let $form = this.$refs.form
+      $form.assignForm(_param)
+      $form.submit()
     },
     reset(){
-      this.$refs['form'].resetFields();
-      // [20210518][upd] 重置日期
-      this.queryList.forEach(item=>{
-        if(item.type == 'dateRange'){
-          this.queryFormDate[item.prop] = []
-          this.queryForm[item.props[0]] = ''
-          this.queryForm[item.props[1]] = ''
-        }
-      })
+      let $form = this.$refs.form
+      $form.$refs.form.resetFields()
+      $form.resetDateRangeFields()
       this.query()
-    },
-    // [20210518][crt] 日期格式化
-    dateFormatting(date, item){
-      if(!date){
-        this.queryForm[item.prop] = ''
-        this.queryForm[item.props[0]] = ''
-        this.queryForm[item.props[1]] = ''
-        return
-      }
-      this.queryForm[item.props[0]] = date[0].split(' ')[0]
-      this.queryForm[item.props[1]] = date[1].split(' ')[0]
     }
   }
 }
@@ -157,16 +83,20 @@ export default {
   background: #fff;
   border-radius: 5px;
 }
+.es-query .es-form{
+  padding: 0;
+}
 .es-query .el-form{
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 10px;
 }
 .es-query .el-form .el-form-item{
-  display: flex;
+  /* display: flex;
+  padding-right: 20px; */
 }
 .es-query .el-form-item__content{
-  margin-left: 0 !important;
+  /* width: 100%;
+  margin-left: 0 !important; */
 }
 .es-query .es-button-group{
   justify-content: flex-end;

@@ -22,9 +22,9 @@
     <div class="es-crumb-right">
       <!-- <slot name="button-group"></slot> -->
       <es-button-group
-        :list-setting="buttonListSetting"
-        :button-list="buttonList"
-        :parent="buttonEventInvokeBody"
+        v-bind="$attrs"
+        v-on="$listeners"
+        :parent="$parent"
         :current="this"
       />
     </div>
@@ -67,38 +67,6 @@ export default {
     width: {
       type: [String, Number],
       default: 'auto',
-    },
-    // 按钮组
-    buttonList: {
-      type: Array,
-      required: true,
-    },
-    buttonListSetting: {
-      type: Object,
-      default: () => {
-        return {
-          size: 'size',
-          type: 'type',
-          plain: 'plain',
-          round: 'round',
-          circle: 'circle',
-          loading: 'loading',
-          disabled: 'disabled',
-          icon: 'icon',
-          autofocus: 'autofocus',
-          buttonName: 'buttonName',
-          nativeType: 'nativeType',
-          visible: 'visible', // boolean
-          clickEvent: 'clickEvent',
-        }
-      }
-    },
-    // [20210517][upd]
-    buttonEventInvokeBody: {
-      type: Object,
-      default: ()=>{
-        return this.$parent
-      }
     }
   },
 }

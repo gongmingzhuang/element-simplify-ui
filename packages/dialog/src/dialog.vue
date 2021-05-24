@@ -9,8 +9,8 @@
       <span>{{tips}}</span>
       <span slot="footer" class="dialog-footer">
         <es-button-group
-          :list-setting="buttonListSetting"
-          :button-list="buttonList"
+          v-bind="$attrs"
+          v-on="$listeners"
           :parent="$parent"
           :current="this"
         />
@@ -38,32 +38,7 @@ export default {
     tips: {
       type: String,
       default: "确定执行该操作？"
-    },
-    buttonListSetting: {
-      type: Object,
-      default: () => {
-        return {
-          size: 'size',
-          type: 'type',
-          plain: 'plain',
-          round: 'round',
-          circle: 'circle',
-          loading: 'loading',
-          disabled: 'disabled',
-          icon: 'icon',
-          autofocus: 'autofocus',
-          buttonName: 'buttonName',
-          nativeType: 'nativeType',
-          visible: 'visible', // boolean
-          clickEvent: 'clickEvent',
-        }
-      },
-    },
-    buttonList: {
-      type: Array,
-      default: ()=>[]
-    }
-    
+    }    
   },
   data(){
     return{
@@ -85,13 +60,4 @@ export default {
 }
 </script>
 <style>
-.es-crumb {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 10px;
-  background: #fff;
-  border-radius: 5px;
-}
 </style>

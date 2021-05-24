@@ -5,35 +5,35 @@
       <!-- [20210519][upg] 追加不可见控制 -->
       <!-- [20210519][remark] 当同时设置visible 与invisible 时，invisible 失效 -->
       <es-button
-        v-if="(typeof(scope) == 'object' && typeof(item[listSetting.visible || 'visible']) == 'object') ? 
-        checkVisible(scope, item[listSetting.visible || 'visible']) : 
-        typeof(item[listSetting.visible || 'visible']) == 'boolean' ? 
-        item[listSetting.visible || 'visible'] : 
+        v-if="(typeof(scope) == 'object' && typeof(item[buttonListSetting.visible || 'visible']) == 'object') ? 
+        checkVisible(scope, item[buttonListSetting.visible || 'visible']) : 
+        typeof(item[buttonListSetting.visible || 'visible']) == 'boolean' ? 
+        item[buttonListSetting.visible || 'visible'] : 
 
-        (typeof(scope) == 'object' && typeof(item[listSetting.invisible || 'invisible']) == 'object') ?
-        checkInvisible(scope, item[listSetting.invisible || 'invisible']) : 
-        typeof(item[listSetting.invisible || 'invisible']) == 'boolean' ? 
-        item[listSetting.invisible || 'invisible'] : 
+        (typeof(scope) == 'object' && typeof(item[buttonListSetting.invisible || 'invisible']) == 'object') ?
+        checkInvisible(scope, item[buttonListSetting.invisible || 'invisible']) : 
+        typeof(item[buttonListSetting.invisible || 'invisible']) == 'boolean' ? 
+        item[buttonListSetting.invisible || 'invisible'] : 
 
         'true'"
         :key="index"
-        :size="item[listSetting.size || 'size']"
-        :type="item[listSetting.type || 'type']"
-        :plain="item[listSetting.plain || 'plain']"
-        :round="item[listSetting.round || 'round']"
-        :circle="item[listSetting.circle || 'circle']"
-        :loading="item[listSetting.loading || 'loading']"
-        :disabled="item[listSetting.disabled || 'disabled']"
-        :icon="item[listSetting.icon || 'icon']"
-        :autofocus="item[listSetting.autofocus || 'autofocus']"
-        :native-type="item[listSetting.nativeType || 'nativeType']"
-        @click="parent[item[listSetting.clickEvent || 'clickEvent']] ?
-         parent[item[listSetting.clickEvent || 'clickEvent']](scope, $parent) :
+        :size="item[buttonListSetting.size || 'size']"
+        :type="item[buttonListSetting.type || 'type']"
+        :plain="item[buttonListSetting.plain || 'plain']"
+        :round="item[buttonListSetting.round || 'round']"
+        :circle="item[buttonListSetting.circle || 'circle']"
+        :loading="item[buttonListSetting.loading || 'loading']"
+        :disabled="item[buttonListSetting.disabled || 'disabled']"
+        :icon="item[buttonListSetting.icon || 'icon']"
+        :autofocus="item[buttonListSetting.autofocus || 'autofocus']"
+        :native-type="item[buttonListSetting.nativeType || 'nativeType']"
+        @click="parent[item[buttonListSetting.clickEvent || 'clickEvent']] ?
+         parent[item[buttonListSetting.clickEvent || 'clickEvent']](scope, $parent) :
          item.assignCurrentParent ? current[item.clickEvent || 'clickEvent']() :
          handelClick(item, index, $event) "
       >
-        <!-- @click="handelClick(item[listSetting.clickEvent || 'clickEvent'])" -->
-        <slot>{{ item[listSetting.buttonName || 'buttonName'] }}</slot>
+        <!-- @click="handelClick(item[buttonListSetting.clickEvent || 'clickEvent'])" -->
+        <slot>{{ item[buttonListSetting.buttonName || 'buttonName'] }}</slot>
       </es-button>
     </template>
   </div>
@@ -66,7 +66,7 @@ export default {
       required: true,
     },
     // 数组组成配置
-    listSetting: {
+    buttonListSetting: {
       type: Object,
       default: () => {
         return {

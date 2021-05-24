@@ -295,3 +295,94 @@ validateCustomList = [
   }
 ]
 ```
+
+
+# [1.0.20][20210524]
+1. `<es-form>`
+- [crt] 通过[form-columns] 配置表单字段，通过[form-setting] 配置表单布局样式，通过[button-list] 配置按钮，通过[validate-custom-list] 配置自定义校验规则；
+- 使用该组件相关组件有`<es-query>`/`<es-dialog-form>`；
+- 触发表单提交按钮事件为当前组件`<es-form>`/`<es-query>`/`<es-dialog-form>` 中配置回调方法 @submit-event，回调参数为表单对象；
+- 新增支持复选框select、单选框radio；目前支持text/radio/select/dateRange；
+```html
+ <es-form
+    labelWidth="120px"
+    @submit-event="submitDialogForm"
+    :form-setting="{
+      col: 3,
+      itemWrap: false
+    }"
+    :form-columns="[
+      { label: '基本信息', type: 'title' },
+      { label: '企业名称', prop: 'companyName', validate: ['v-required'] },
+      { label: '信用代码', prop: 'businessLicenseCode', validate: ['v-required', 'v-email'] },
+      { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-number'] },
+      { label: '基本信息', type: 'title' },
+      { label: '创建时间', prop: 'dateRange', props: ['start', 'end'], type: 'dateRange', validate: ['v-required']},
+      { label: '密码', prop: 'pwd', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
+      { label: '确认密码', prop: 'rpwd', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+    ]"
+    :button-list="[
+      { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
+      { buttonName: '确定+', clickEvent: 'submit', assignCurrentParent: true }
+    ]"
+    :validate-custom-list="[
+      { validName: 'v-number', 
+        validator: function(item){
+          return{
+            validator: validNumber(item),
+            trigger: ['blur', 'change']
+          }
+        }
+      }
+    ]"
+  />
+```
+
+2. `<es-dialog>`/`<es-dialog-form>`/`<es-query>`
+- [upd] 针对引入按钮组组件`<es-button-group>`，将[button-list] 通过`v-bind`/`v-on` 代替；
+- [upd] `<es-dialog-form` 原表单组件`<el-form>` 改为`<es-form>`，参数通过`v-bind`/`v-on` 代替；
+
+3. `<es-table>`/`<es-form>`
+- [upd]（参考） 对于状态值配置文件（@/assets/json/status/status.json），`<es-form>` 下拉框使用的状态值类型为“数组”，`<es-table>` 列表状态值类型为“对象”；配置文件默认配置类型为“数组”，通过调用对应的状态值方法获取；
+```javascript
+// @/assets/json/status/status.json
+// @param {number} kind: 对于`<es-form>`和`<es-table>` 两个主要使用组件，通过kind 进行切换，缺省值返回数组；
+// @param {number} type: 对于同一个状态字段，可能存在多个使用场景，可通过type 字段进行切换；
+export function status (kind, type) {
+  let _status = {};
+  // 任务状态1
+  let status_1 = [
+    {label: '已生效', value: 1},
+    {label: '回退', value: 2},
+    {label: '禁用', value: 3},
+    {label: '未生效', value: 0}
+  ]
+  // 审批状态2
+  let status_2 = [
+    {label: '已审批', value: 1},
+    {label: '未审批', value: 2}
+  ]
+  !type && (type = 0)
+  switch (type) {
+    case 0:
+      _status = status_1
+      break
+    case 1:
+      _status = status_2
+      break
+  }
+
+  if (kind) {
+    _status = translateToObject(_status)
+  }
+  return _status
+}
+
+function translateToObject (statusArray) {
+  let _obj = {}
+  statusArray.forEach(item => {
+    _obj[item.value] = item.label
+  })
+  return _obj
+}
+```
