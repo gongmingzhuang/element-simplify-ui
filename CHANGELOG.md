@@ -386,3 +386,10 @@ function translateToObject (statusArray) {
   return _obj
 }
 ```
+
+# [1.0.21][20210525]
+1. `<es-form>` 
+- [upg] 新增支持地址address\文件上传file;
+
+2. `<es-upload>` 
+- [init]

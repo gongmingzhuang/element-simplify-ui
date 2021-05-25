@@ -9,6 +9,7 @@ import EsMenu from "../packages/menu/index"
 import EsQuery from "../packages/query/index"
 import EsTable from "../packages/table/index"
 import EsTabs from "../packages/tabs/index"
+import EsUpload from "../packages/upload/index"
 import 'element-ui/lib/theme-chalk/index.css'
 import '../lib/css/public.css'
 import ElementUI from 'element-ui'
@@ -23,7 +24,8 @@ const components = [
   EsMenu,
   EsQuery,
   EsTable,
-  EsTabs
+  EsTabs,
+  EsUpload
 ]
 
 const install = Vue => {

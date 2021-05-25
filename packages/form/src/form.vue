@@ -34,7 +34,10 @@
           <template v-if="item.type=='radio'">
             <el-radio-group v-model="form[item.prop]">
               <template v-for="(itm,idx) in item.translate">
-                <el-radio :key="index+'_'+itm.value" :label="itm.value">{{itm.label}}</el-radio>
+                <el-radio
+                  :key="index+'_'+itm.value"
+                  :label="itm.value"
+                >{{itm.label}}</el-radio>
               </template>
             </el-radio-group>
           </template>
@@ -53,6 +56,20 @@
               </el-option>
             </el-select>
           </template>
+          <!-- 省市区选择 -->
+          <template v-if="item.type=='address'">
+            <el-input
+              v-model="form[item.prop]"
+              v-show="false"
+            />
+            <el-cascader
+              size="large"
+              :options="regionOptions"
+              v-model="selectedRegionOptions"
+              @change="val=>handleChangeRegion(val,item)"
+            >
+            </el-cascader>
+          </template>
           <!-- 日期选择框 -->
           <template v-if="item.type=='dateRange'">
             <el-date-picker
@@ -64,6 +81,20 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
+            />
+          </template>
+          <!-- 输入框 -->
+          <template v-if="item.type=='file'">
+            <el-input
+              v-model="form[item.prop]"
+              v-show="false"
+            />
+            <es-upload
+              v-bind="$attrs"
+              v-on="$listeners"
+              :file-path="form[item.prop]"
+              :upload-config="item.uploadConfig"
+              @on-success="handleOnSuccess"
             />
           </template>
         </el-form-item>
@@ -94,12 +125,23 @@
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
+import EsUpload from '../../upload/src/upload'
 import VALID_SET from '../../../lib/validate'
+// 省市区联动数据
+import {
+  provinceAndCityData,
+  regionData,
+  provinceAndCityDataPlus,
+  regionDataPlus,
+  CodeToText,
+  TextToCode,
+} from 'element-china-area-data'
 export default {
   // extends: Form,
   name: 'EsForm',
   components: {
     EsButtonGroup,
+    EsUpload,
   },
   props: {
     showLabel: {
@@ -148,6 +190,9 @@ export default {
   data() {
     return {
       form: {},
+      regionOptions: regionData, // 1102 省市区 全部数据
+      selectedRegionOptions: [], // 1102 省市区 选择数据
+      selectedRegionData: {}, // 1102 省市区 选择数据
     }
   },
   created() {
@@ -219,6 +264,64 @@ export default {
         }
       })
     },
+    // [20210525][crt] 省市区地址
+    handleChangeRegion(val, item) {
+      this.selectedRegionData = {} // 初始化
+      let regionArr = val
+      let regionLen = 45 // 省市区字符串总长度
+      let regionText = '' // 省市区地址中文
+      let valType = item.valueType || 'text' // 地址值类型 text code array
+      regionArr.forEach((itm) => {
+        regionLen += CodeToText[itm].length * 15
+        regionText += CodeToText[itm]
+      })
+
+      // 所在地区选择赋值-校验规则
+      this.$set(
+        this.form,
+        item.prop,
+        valType == 'text'
+          ? regionText
+          : valType == 'code'
+          ? val.join(',')
+          : JSON.stringify(val)
+      )
+      // 港澳数据出来 len=2
+      if (val.length == 2) {
+        this.selectedRegionData.provinceId = ''
+        this.selectedRegionData.province = ''
+        this.selectedRegionData.cityId = regionArr[0]
+        this.selectedRegionData.city = CodeToText[regionArr[0]]
+        this.selectedRegionData.districtId = regionArr[1]
+        this.selectedRegionData.district = CodeToText[regionArr[1]]
+      } else {
+        this.selectedRegionData.provinceId = regionArr[0]
+        this.selectedRegionData.province = CodeToText[regionArr[0]]
+        this.selectedRegionData.cityId = regionArr[1]
+        this.selectedRegionData.city = CodeToText[regionArr[1]]
+        this.selectedRegionData.districtId = regionArr[2]
+        this.selectedRegionData.district = CodeToText[regionArr[2]]
+      }
+    },
+    // 地址控件转换
+    // 用法：this.$refs['es-form'].transferRegion('140000,140300,140303', 'addr')
+    transferRegion(addrStr, prop) {
+      this.form[prop] = addrStr
+      let [provinceId, cityId, districtId] = addrStr.split(',')
+      if (!provinceId) {
+        this.selectedRegionOptions = [cityId, districtId]
+      } else {
+        this.selectedRegionOptions = [provinceId, cityId, districtId]
+      }
+      let regionLen = 45
+      this.selectedRegionOptions.forEach((item) => {
+        regionLen += CodeToText[item].length * 15
+      })
+    },
+    // [20210525][crt] 文件上传成功
+    handleOnSuccess(res){
+      this.$emit('file-setting', { form: this.form, prop: 'avatar', result: res})
+    }
   },
 }
 </script>
@@ -250,7 +353,8 @@ export default {
 .el-form-item.item-wrap > div {
   margin-left: 0 !important;
 }
-.es-form .el-select{
+.es-form .el-select,
+.es-form .el-cascader {
   width: 100%;
 }
 
