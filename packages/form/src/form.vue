@@ -84,17 +84,23 @@
             />
           </template>
           <!-- 输入框 -->
-          <template v-if="item.type=='file'">
+          <template v-if="item.type=='file' || item.type=='preview'">
             <el-input
               v-model="form[item.prop]"
               v-show="false"
             />
             <es-upload
-              v-bind="$attrs"
-              v-on="$listeners"
+              :type="item.type"
+              :action="item.setting.action || '/'"
               :file-path="form[item.prop]"
-              :upload-config="item.uploadConfig"
-              @on-success="handleOnSuccess"
+              :setting="item.setting"
+
+              :reset-button="item.resetButton"
+              :pdf-preview="item.onPdfPreview"
+              :before-upload="item.beforeUpload"
+
+              @on-success="res => handleOnSuccess(res,item)"
+              @on-reset="res=>handleOnReset(res,item)"
             />
           </template>
         </el-form-item>
@@ -119,9 +125,6 @@
  * [20210521][crt]
  * @author: gongmingzhuang
  *
- * - 1. 通过extends 可直接继承<el-form> 的props 变量
- * - 2. 通过queryList 数组生成queryForm 表单对象
- * - 3. 通过$emit 将表单传递给父组件调用查询
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
@@ -137,21 +140,23 @@ import {
   TextToCode,
 } from 'element-china-area-data'
 export default {
-  // extends: Form,
   name: 'EsForm',
   components: {
     EsButtonGroup,
     EsUpload,
   },
   props: {
+    // 显示label
     showLabel: {
       type: Boolean,
       default: true,
     },
+    // label 宽度
     labelWidth: {
       type: String,
       default: '',
     },
+    // 表单配置
     formSetting: {
       type: Object,
       default: () => {
@@ -161,15 +166,17 @@ export default {
         }
       },
     },
-    // 数组
+    // 表单字段
     formColumns: {
       type: Array,
       required: true,
     },
+    // 自定义校验规则
     validateCustomList: {
       type: Array,
       default: () => [],
     },
+    // 校验规则
     rules: {
       type: Object,
       default: () => {
@@ -189,13 +196,14 @@ export default {
   },
   data() {
     return {
-      form: {},
+      form: {}, // 表单对象
       regionOptions: regionData, // 1102 省市区 全部数据
       selectedRegionOptions: [], // 1102 省市区 选择数据
       selectedRegionData: {}, // 1102 省市区 选择数据
     }
   },
   created() {
+    // 添加校验规则
     this.formColumns.forEach((item) => {
       if (item.type == 'dageRange') {
         this.$set(this.form, item.props[0], '')
@@ -237,6 +245,7 @@ export default {
       this.form[item.props[0]] = this.$moment(date[0]).format(_valueFormat)
       this.form[item.props[1]] = this.$moment(date[1]).format(_valueFormat)
     },
+    // [20210518] 表单提交
     submit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -303,7 +312,7 @@ export default {
         this.selectedRegionData.district = CodeToText[regionArr[2]]
       }
     },
-    // 地址控件转换
+    // [20210525] 地址控件转换
     // 用法：this.$refs['es-form'].transferRegion('140000,140300,140303', 'addr')
     transferRegion(addrStr, prop) {
       this.form[prop] = addrStr
@@ -319,8 +328,12 @@ export default {
       })
     },
     // [20210525][crt] 文件上传成功
-    handleOnSuccess(res){
-      this.$emit('file-setting', { form: this.form, prop: 'avatar', result: res})
+    handleOnSuccess(res, item){
+      typeof(item.onSuccess) == 'function' && item.onSuccess({ form: this.form, prop: item.prop, result: res})
+    },
+    // [20210527][crt] 重置字段
+    handleOnReset(res,item){
+      this.form[item.prop] = ''
     }
   },
 }

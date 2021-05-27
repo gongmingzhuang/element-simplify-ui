@@ -393,3 +393,52 @@ function translateToObject (statusArray) {
 
 2. `<es-upload>` 
 - [init]
+
+
+# [1.0.22][20210527]
+1. `<es-upload>`
+- [crt] 默认不对上传成功后数据处理（即对表单字段进行赋值操作），需要通过配置在页面中配置[onSuccess] 方法，在页面中进行操作；
+- [upg] 默认集成文件上传、文件修改、文件移除、文件预览功能；
+- [upg] 通过type（file/preview） 控制上传/预览状态切换；
+- [upg] 允许传入[beforeUpload] 方法覆盖原方法执行，需要在`<es-form>` 中[form-columns] 配置；当前支持文件过滤判断[jpg\png\pdf]；
+- [upg] 允许传入[onReset] 来进行重置上传文件字段；开启功能通过[resetButton] 进行配置；
+- [upg] 针对pdf 文件预览，可以通过传入[onPdfPreview] 方法在页面中配置具体实现方法；
+```html
+  <es-upload
+    :type="item.type"
+    :action="item.setting.action || '/'"
+    :file-path="form[item.prop]"
+    :setting="item.setting"
+
+    :reset-button="item.resetButton"
+    :pdf-preview="item.onPdfPreview"
+    :before-upload="item.beforeUpload"
+
+    @on-success="res => handleOnSuccess(res,item)"
+    @on-reset="res=>handleOnReset(res,item)"
+  />
+```
+
+2. `<es-form>`
+- [upd] 针对`<es-upload>` 组件，当文件上传成功后，调用对应的[on-success] 方法来往上调用页面中配置的[onSuccess] 方法；
+- [upg] 对于`<es-upload>` 新增重置/清空上传文件字段值，通过调用[on-reset] 方法来重置对应字段；
+- [upg] 针对`<es-form>` 字段数组中关于文件类型表单字段进行调整；
+```javascript
+var formColumns = [
+  { 
+    label: '头像',
+    prop: 'avatar',
+    type: 'file', // 文件操作类型 file-文件上传、修改 preview-文件预览
+    validate: ['v-required'],
+    setting: {
+      accept: ['jpg','png'], // 文件支持类型
+      fileSize: 10, // 文件最大尺寸（M）
+      action: 'http://127.0.0.1:8080/upload' // 文件上传接口
+    },
+    beforeUpload: function(file){}, // 非必填，文件上传前执行，通过return true 允许继续执行文件上传；
+    onSuccess: function(data){}, // 必填，返回let {form,prop,result}=data，自行赋值到表单字段；
+    onPdfPreview: function(filePath){}, // 非必填，处理pdf 文件预览；
+    resetButton: true // 启用清除表单已上传文件字段值；
+  }
+]
+```
