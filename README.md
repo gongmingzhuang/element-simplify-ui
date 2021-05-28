@@ -1,4 +1,7 @@
 # element-simplify-ui
+- 对element-ui 进行简化，对某些页面常用的组件进行整合，以简化使用时配置；
+- 组件采用JSON 格式进行页面元素配置，而非直接通过操作页面元素进行布局；
+
 &nbsp;
 ## 组件具体使用方法，请查阅 `./demo/example.md`
 
