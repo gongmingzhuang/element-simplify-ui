@@ -442,3 +442,9 @@ var formColumns = [
   }
 ]
 ```
+
+# [1.0.23][20210528]
+1. `<es-button-group>`
+- 修改按钮组事件调用方式，[button-list] 数组按钮对象clickEvent 属性，如果传入值为Function 则调用当前组件中的同名方法；如果传入值为String，且配置assignCurrentParent=true，则调用中间件同名方法，否则调用`<es-button-group>` 组件中的同名方法；
+
+2. [init] 新增组件使用说明文档

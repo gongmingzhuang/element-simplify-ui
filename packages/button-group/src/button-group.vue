@@ -27,12 +27,12 @@
         :icon="item[buttonListSetting.icon || 'icon']"
         :autofocus="item[buttonListSetting.autofocus || 'autofocus']"
         :native-type="item[buttonListSetting.nativeType || 'nativeType']"
-        @click="parent[item[buttonListSetting.clickEvent || 'clickEvent']] ?
-         parent[item[buttonListSetting.clickEvent || 'clickEvent']](scope, $parent) :
-         item.assignCurrentParent ? current[item.clickEvent || 'clickEvent']() :
+        @click="typeof item[buttonListSetting.clickEvent || 'clickEvent']=='function' ?
+         item[buttonListSetting.clickEvent || 'clickEvent'](scope, $parent) :
+         item.assignCurrentParent ? 
+         current[item.clickEvent || 'clickEvent']() :
          handelClick(item, index, $event) "
       >
-        <!-- @click="handelClick(item[buttonListSetting.clickEvent || 'clickEvent'])" -->
         <slot>{{ item[buttonListSetting.buttonName || 'buttonName'] }}</slot>
       </es-button>
     </template>
@@ -118,6 +118,7 @@ export default {
     // @param {object} e - 当前点击元素对象
     // [20210520][upd] 在点击快捷过滤按钮时，重置当前分页
     handelClick(item, index, e) {
+      debugger
       let _param = {}
       _param[this.pagerSetting['currentPage' || 'currentPage']] = 1
       Object.assign(_param, item.default)

@@ -1,5 +1,7 @@
 <template>
   <div class="es-form">
+    {{rules}}
+    {{validateCustomList}}
     <el-form
       ref="form"
       :model="form"
@@ -217,14 +219,18 @@ export default {
             item.validate.forEach((itm) => {
               var _valid = {}
               // 默认校验
-              VALID_SET.hasOwnProperty(itm) &&
-                (_valid = VALID_SET[itm](item, this.formColumns, this))
-              // 自定义校验
-              this.validateCustomList.forEach((vitem) => {
-                if (itm == vitem.validName) {
-                  _valid = vitem.validator(item)
-                }
-              })
+              if(VALID_SET.hasOwnProperty(itm)){
+                _valid = VALID_SET[itm](item, this.formColumns, this)
+              }else{
+                // 自定义校验
+                this.validateCustomList.forEach((vitem) => {
+                  if (itm == vitem.validName) {
+                    // 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
+                    _valid.validator = vitem.validator(item, Error)
+                    _valid.trigger=['blur', 'change']
+                  }
+                })
+              }
               this.rules[item.prop].push(_valid)
             })
           }

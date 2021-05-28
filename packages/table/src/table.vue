@@ -11,7 +11,7 @@
         <div class="quick-filter">
           <es-button-group
             v-on="$listeners"
-            :list-setting="quickFilterSetting"
+            :button-list-setting="quickFilterSetting"
             :button-list="quickFilter"
             :pager-setting="pagerSetting"
             :parent="$parent"
@@ -20,7 +20,7 @@
         </div>
         <div class="extra-operate">
           <es-button-group
-            :list-setting="extraOperateSetting"
+            :button-list-setting="extraOperateSetting"
             :button-list="extraOperate"
             :parent="$parent"
           />

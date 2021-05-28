@@ -62,13 +62,9 @@ export default {
           replace: 'replace',
         }
       },
-    },
-    // 导航栏宽度
-    width: {
-      type: [String, Number],
-      default: 'auto',
     }
   },
+  methods: {}
 }
 </script>
 <style>

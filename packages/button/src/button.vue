@@ -1,16 +1,7 @@
 <template>
   <div class="es-button">
     <el-button
-      :size="size"
-      :type="type"
-      :plain="plain"
-      :round="round"
-      :circle="circle"
-      :loading="loading"
-      :disabled="disabled"
-      :icon="icon"
-      :autofocus="autofocus"
-      :native-type="nativeType"
+      v-bind="$attrs"
       v-on="$listeners"
     >
       <slot></slot>
@@ -28,7 +19,7 @@
  */
 import { Button } from 'element-ui'
 export default {
-  extends: Button,
+  // extends: Button,
   name: 'EsButton'
 }
 </script>

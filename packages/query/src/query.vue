@@ -32,11 +32,6 @@ export default {
     EsForm
   },
   props: {
-    // [20210518][upg]
-    showLabel: {
-      type: Boolean,
-      default: true
-    },
     // 按钮组
     buttonList: {
       type: Array,
