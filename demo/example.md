@@ -93,6 +93,20 @@ button-list|右侧按钮数组，见`<es-button-group>`|array|--|--
 to|路由跳转对象，同 vue-router 的 to，对标element-ui to|string/object|--|--
 replace|在使用 to 进行路由跳转时，启用 replace 将不会向 history 添加新记录，对标element-ui replace|boolean|--|false
 
+```html
+<!-- 示例 -->
+<es-crumb
+  :crumb-list="[
+        { crumbName: '首页' },
+        { crumbName: '基础管理'},
+        { crumbName: '个人中心' }
+      ]"
+  :button-list="[
+        { buttonName: '添加', size: 'mini', clickEvent: openDialog, assignCurrentParent: true, visible: /添加/.test(btnJur) && stackArray.length === 1 },
+        { buttonName: '返回上一级', size: 'mini', type: 'success', clickEvent: 'stackBack', visible: stackArray.length > 1},
+      ]"
+/>
+```
 
 &nbsp;
 
@@ -116,6 +130,19 @@ button-list|右侧按钮数组，见`<es-button-group>`|array|--|--
 - 说明1：唤起弹窗通过调用`<es-dialog>` 组件内open 方法实现：this.$refs[esDialog].open()；
 - 说明2：[button-list] 元素对象，需要配置clickEvent='close' 和assignCurrentParent=true，让`<es-button-group>`调用`<es-dialog>` 内close 方法实现关闭弹窗，或通过执行this.$refs[esDialog].close()实现；
 
+```html
+<!-- 示例 -->
+<es-dialog
+  ref="esDialog"
+  :title="'提示'"
+  :tips="'这是一段信息'"
+  :button-list="[
+    { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true  },
+    { buttonName: '确定', clickEvent: 'close', assignCurrentParent: true  }
+  ]"
+/>
+```
+
 &nbsp;
 
 ##  `<es-dialog-form>` 弹窗表单组件 #########################################################
@@ -132,6 +159,36 @@ form-setting|同`<es-form>`，表单布局配置，col-表示一行有多少个�
 `*` form-columns|同`<es-form>`，表单字段配置（详见`<es-form>`）|array|--|--
 `*` button-list|同`<es-form>`，表单操作提交按钮配置|array|--|--
 validate-custom-list|同`<es-form>`，表单新增校验规则定义数组|array|--|--
+
+&nbsp;
+
+```html
+<!-- 示例 -->
+<es-dialog-form
+  ref="esDialogForm"
+  :title="'收获地址'"
+  labelWidth="100px"
+  @submit-event="submitDialogForm"
+  :form-setting="{
+    col: 2
+  }"
+  :form-columns="[
+    { label: '基本信息', type: 'title' },
+    { label: '企业名称', prop: 'companyName', validate: ['v-required'] },
+    { label: '信用代码', prop: 'businessLicenseCode', validate: ['v-required', 'v-number'] },
+    { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-number'] },
+    { label: '头像', prop: 'avatar', type: 'file', validate: [], setting: { accept: ['jpg','png'], filesize: 10, action: 'http://192.168.200.203:8099/index/upload'}, beforeUpload: false, onSuccess: fileSetting, onPdfPreview: pdfPreview, resetButton: true },
+    { label: '基本信息', type: 'title' },
+    { label: '创建时间', prop: 'dateRange', props: ['start', 'end'], type: 'dateRange', validate: ['v-required'], valueFormat: 'yyyy/MM/DD'},
+    { label: '密码', prop: 'pwd', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
+    { label: '确认密码', prop: 'rpwd', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+  ]"
+  :button-list="[
+    { buttonName: '取消', clickEvent: 'close', assignCurrentParent: true },
+    { buttonName: '确定', type: 'primary', clickEvent: 'submit', assignCurrentParent: true }
+  ]"
+/>
+```
 
 &nbsp;
 
@@ -219,7 +276,7 @@ resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“�
         { label: '基本信息', type: 'title' },
         { label: '企业名称', prop: 'companyName', validate: ['v-required'] },
         { label: '信用代码', prop: 'businessLicenseCode', validate: ['v-required', 'v-number'] },
-        { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-number'] },
+        { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-numx'] },
         { label: '状态值', prop: 'status2', type: 'radio', validate: ['v-required'], translate: status(0, 1) },
         { label: '类型', prop: 'type', type: 'select', validate: ['v-required'], translate: status() },
         { label: '地址', prop: 'addr', type: 'address', valueType: 'code', validate: ['v-required']},
@@ -233,7 +290,22 @@ resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“�
         { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
         { buttonName: '确定+', clickEvent: 'submit', assignCurrentParent: true }
       ]"
-      :validate-custom-list="[]"
+      :validate-custom-list="[
+        {
+          validName: 'v-numx',
+          validator: (item, Error) =>
+            (rule, value, callback) =>{
+              if (!value) {
+                return callback(Error(item.label + '不能为空'))
+              }
+              if (isNaN(value)) {
+                callback(Error('请输入数字值'))
+              } else {
+                callback()
+              }
+            }
+        }
+      ]"
     />
 ```
 
@@ -273,6 +345,26 @@ button-list|条件查询按钮，详见`<es-button-group>`|array|--|[<br>&nbsp;&
 事件名|说明|参数
 --|:--|:--
 `*` submit-event|同`<es-form>`，表单组件校验通过后调用该方法，返回表单对象|Function(object)
+
+```html
+<!-- 示例 -->
+<es-query
+  @submit-event="getList"
+  label-width="150px"
+  :form-setting="{
+    col: 3,
+    itemWrap: false
+  }"
+  :form-columns="[
+        { label: '企业名称', prop: 'companyName' },
+        { label: '统一社会信用代码', prop: 'businessLicenseCode' },
+        { label: '创建时间', prop: 'dateRange', props: ['start', 'end'], type: 'dateRange'},
+      ]"
+  :pager-setting="{
+    currentPage: 'pageNum'
+  }"
+/>
+```
 
 &nbsp;
 
@@ -353,5 +445,52 @@ selection-change|**[selection 限定]** 用于列表多选框变动时触发|Fun
       })
 
 ```
-
+```html
+<!-- 示例 -->
+    <es-table
+      @query-event="getList"
+      @selection-change="handleSelectionChange"
+      :quick-filter="[
+        {buttonName: '全部', type:'primary', default: { status: ''}},
+        {buttonName: '已生效', default: { status: 1}},
+        {buttonName: '未生效', default: { status: 2}},
+        {buttonName: '禁用', default: { status: 3}}
+      ]"
+      :extra-operate="[
+        { buttonName: '选择子公司', size: 'mini', clickEvent: openDialogForm },
+        { buttonName: '返回上一级', size: 'mini', clickEvent: 'openDialogForm2' }
+      ]"
+      :table-columns="[
+        { label: '', prop: 'eid', type: 'selection', width: 100 },
+        { label: '企业名称', prop: 'companyName', width: 200 },
+        { label: '信用代码', prop: 'businessLicenseCode', width: 250 },
+        { label: '已开通服务', prop: 'capitalNames' },
+        { label: '状态', prop: 'status', translate: status(1) },
+        { label: '审批状态', prop: 'approveStatus', translate: approveStatus() },
+        { label: '企业来源', prop: 'companyFrom', translate: companyFrom() },
+        { label: '子公司数', prop: 'sonNumber', width: 90, moneyFormat: 1 },
+        { label: '创建时间', prop: 'createTime', width: 170, dateFormat: 1 },
+        { label: '创建人', prop: 'createOperator' },
+        { label: '操作', prop: 'oprationToll', width: 570, fixed: 'right' }
+      ]"
+      :table-operate="[
+        { buttonName: '查看', size: 'mini', clickEvent: 'addEnterprise' },
+        { buttonName: '编辑', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '设置管理员', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '子公司', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '重置密码', size: 'mini', clickEvent: 'handleClick', visible: /重置密码/.test(btnJur) },
+        { buttonName: '启用', size: 'mini', clickEvent: 'handleClick' },
+        { buttonName: '禁用', size: 'mini', clickEvent: 'handleClick', invisible: [/禁用/.test(btnJur), {status: 0, companyFrom: 'HRM'}] }
+      ]"
+      :pager-setting="{
+        currentPage: 'pageNum'
+      }"
+      :data="tableData.data"
+      :pager="tableData.pager"
+      size="mini"
+      stripe
+    >
+      <template slot="title">企业列表（{{tableData.pager.total}}）</template>
+    </es-table>
+```
 &nbsp;
