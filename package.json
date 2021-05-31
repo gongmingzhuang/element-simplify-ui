@@ -1,6 +1,6 @@
 {
   "name": "element-simplify-ui",
-  "version": "1.0.24",
+  "version": "1.0.26",
   "description": "基于element-ui 进行二次简化封装",
   "main": "src/index.js",
   "scripts": {
@@ -29,8 +29,8 @@
   "dependencies": {
     "element-china-area-data": "^5.0.2",
     "element-ui": "^2.15.1",
-    "less": "^4.1.1",
-    "less-loader": "^9.0.0",
+    "less": "^3.0.0",
+    "less-loader": "^5.0.0",
     "vue": "^2.6.12"
   }
 }

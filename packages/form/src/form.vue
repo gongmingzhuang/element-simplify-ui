@@ -225,7 +225,8 @@ export default {
                 this.validateCustomList.forEach((vitem) => {
                   if (itm == vitem.validName) {
                     // 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
-                    _valid.validator = vitem.validator(item, Error)
+                    // [20210531][upd] 已修复
+                    _valid.validator = vitem.validator(item)
                     _valid.trigger = ['blur', 'change']
                   }
                 })

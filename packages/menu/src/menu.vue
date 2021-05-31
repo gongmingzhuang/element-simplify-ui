@@ -50,7 +50,7 @@
                 :index="`${menuItem[listSetting.index || 'index']}-${subMenuItem[listSetting.index || 'index']}-${subMenuIndex}`"
                 :data-index="`${menuItem[listSetting.index || 'index']}-${subMenuItem[listSetting.index || 'index']}-${subMenuIndex}`"
                 :disabled="subMenuItem[listSetting.disabled || 'disabled']"
-                @click="$emit('menu-item-click', subMenuItem)"
+                @click="$emit('menu-item-click', subMenuItem, subMenuIndex)"
               >
                 <template v-if="subMenuItem[listSetting.href || 'href']">
                   <i class="iconfont"></i>
@@ -78,7 +78,7 @@
             :index="`${menuItem[listSetting.index || 'index']}`"
             :data-index="`${menuItem[listSetting.index || 'index']}`"
             :disabled="menuItem[listSetting.disabled || 'disabled']"
-            @click="$emit('menu-item-click', menuItem)"
+            @click="$emit('menu-item-click', menuItem, menuIndex)"
           >
             <template v-if="menuItem[listSetting.href || 'href']">
               <i class="iconfont"></i>

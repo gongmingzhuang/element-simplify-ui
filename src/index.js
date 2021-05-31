@@ -1,4 +1,5 @@
 
+import EsAside from "../packages/aside/index"
 import EsButton from "../packages/button/index"
 import EsButtonGroup from "../packages/button-group/index"
 import EsCrumb from "../packages/crumb/index"
@@ -15,6 +16,7 @@ import '../lib/css/public.css'
 import ElementUI from 'element-ui'
 
 const components = [
+  EsAside,
   EsButton,
   EsButtonGroup,
   EsCrumb,
@@ -29,7 +31,8 @@ const components = [
 ]
 
 const install = Vue => {
-  // const ElementUI = require('element-ui')
+  // [20210531][upd] 修复在template 中直接使用new Error 报错异常
+  Vue.prototype.Error = Error
   Vue.use(ElementUI)
   components.forEach(component => {
     Vue.component(component.name, component);
@@ -41,5 +44,19 @@ const install = Vue => {
 //   install(window.Vue);
 // }
 
-export default install
+export default {
+  install,
+  EsAside,
+  EsButton,
+  EsButtonGroup,
+  EsCrumb,
+  EsDialog,
+  EsDialogForm,
+  EsForm,
+  EsMenu,
+  EsQuery,
+  EsTable,
+  EsTabs,
+  EsUpload
+}
 
