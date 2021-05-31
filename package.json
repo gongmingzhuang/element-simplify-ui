@@ -1,6 +1,6 @@
 {
   "name": "element-simplify-ui",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "基于element-ui 进行二次简化封装",
   "main": "src/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gongmingzhuang/es-ui.git"
+    "url": "git+https://github.com/gongmingzhuang/element-simplify-ui.git"
   },
   "keywords": [
     "element-ui",
@@ -17,19 +17,20 @@
   "author": "gongmingzhuang",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/gongmingzhuang/es-ui/issues"
+    "url": "https://github.com/gongmingzhuang/element-simplify-ui/issues"
   },
-  "homepage": "https://github.com/gongmingzhuang/es-ui#readme",
+  "homepage": "https://github.com/gongmingzhuang/element-simplify-ui#readme",
   "devDependencies": {
     "assert": "^2.0.0",
     "gulp": "^4.0.2",
     "gulp-bump": "^3.2.0",
-    "less": "^4.1.1",
-    "less-loader": "^8.1.1",
     "mocha": "^8.3.2"
   },
   "dependencies": {
+    "element-china-area-data": "^5.0.2",
     "element-ui": "^2.15.1",
+    "less": "^4.1.1",
+    "less-loader": "^9.0.0",
     "vue": "^2.6.12"
   }
 }

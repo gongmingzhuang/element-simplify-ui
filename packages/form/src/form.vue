@@ -1,7 +1,5 @@
 <template>
   <div class="es-form">
-    {{rules}}
-    {{validateCustomList}}
     <el-form
       ref="form"
       :model="form"
@@ -12,7 +10,10 @@
       <template v-for="(item, index) of formColumns">
         <!-- [upg][20210524] 标题 -->
         <template v-if="item.type=='title'">
-          <p class="form-header">{{item.label}}</p>
+          <p
+            class="form-header"
+            :key="index"
+          >{{item.label}}</p>
         </template>
         <!-- [upg][20210524] 支持分列表单 -->
         <el-form-item
@@ -96,11 +97,9 @@
               :action="item.setting.action || '/'"
               :file-path="form[item.prop]"
               :setting="item.setting"
-
               :reset-button="item.resetButton"
               :pdf-preview="item.onPdfPreview"
               :before-upload="item.beforeUpload"
-
               @on-success="res => handleOnSuccess(res,item)"
               @on-reset="res=>handleOnReset(res,item)"
             />
@@ -219,15 +218,15 @@ export default {
             item.validate.forEach((itm) => {
               var _valid = {}
               // 默认校验
-              if(VALID_SET.hasOwnProperty(itm)){
+              if (VALID_SET.hasOwnProperty(itm)) {
                 _valid = VALID_SET[itm](item, this.formColumns, this)
-              }else{
+              } else {
                 // 自定义校验
                 this.validateCustomList.forEach((vitem) => {
                   if (itm == vitem.validName) {
                     // 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
                     _valid.validator = vitem.validator(item, Error)
-                    _valid.trigger=['blur', 'change']
+                    _valid.trigger = ['blur', 'change']
                   }
                 })
               }
@@ -334,13 +333,14 @@ export default {
       })
     },
     // [20210525][crt] 文件上传成功
-    handleOnSuccess(res, item){
-      typeof(item.onSuccess) == 'function' && item.onSuccess({ form: this.form, prop: item.prop, result: res})
+    handleOnSuccess(res, item) {
+      typeof item.onSuccess == 'function' &&
+        item.onSuccess({ form: this.form, prop: item.prop, result: res })
     },
     // [20210527][crt] 重置字段
-    handleOnReset(res,item){
+    handleOnReset(res, item) {
       this.form[item.prop] = ''
-    }
+    },
   },
 }
 </script>
