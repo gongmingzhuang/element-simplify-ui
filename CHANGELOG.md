@@ -1,14 +1,36 @@
+* <h1 id="home">CHANGELOG</h1>
+* <a href="#1.0.0">[1.0.0]</a>
+* <a href="#1.0.10">[1.0.10]</a>
+* <a href="#1.0.11">[1.0.11]</a>
+* <a href="#1.0.12">[1.0.12]</a>
+* <a href="#1.0.13">[1.0.13]</a>
+* <a href="#1.0.14">[1.0.14]</a>
+* <a href="#1.0.15">[1.0.15]</a>
+* <a href="#1.0.16">[1.0.16]</a>
+* <a href="#1.0.17">[1.0.17]</a>
+* <a href="#1.0.18">[1.0.18]</a>
+* <a href="#1.0.20">[1.0.20]</a>
+* <a href="#1.0.21">[1.0.21]</a>
+* <a href="#1.0.22">[1.0.22]</a>
+* <a href="#1.0.23">[1.0.23]</a>
+* <a href="#1.0.24">[1.0.24]</a>
+* <a href="#1.0.25">[1.0.25]</a>
+* <a href="#1.0.26">[1.0.26]</a>
+* <a href="#1.0.27">[1.0.27]</a>
+* <a href="#1.0.28">[1.0.28]</a>
+* <a href="#1.0.29">[1.0.29]</a>
 
-# [1.0.0-alpha][20210427]
+# #######################################################
+<h1 id="1.0.0">[1.0.0-alpha][20210427] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
 - [init] 引入element-ui
-
-# [1.0.10][20210428]
+# #######################################################
+<h1 id="1.0.10">[1.0.10][20210428] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
 - [test] 测试继承element-ui
+# #######################################################
+<h1 id="1.0.11">[1.0.11][20210428] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.11][20210428]
-+ [crt] 添加`<es-menu>` 导航菜单
 - 继承`<el-menu>` 的所有“Menu Attribute”、“Menu Event”，使用同`<el-menu>`
 - 新增props [menu-list]：导航菜单数组，[width]：导航栏宽度
 ```javascript
@@ -24,21 +46,21 @@
     { index: 3, menuName: "订单管理", href: "http://www.baidu.com" }
   ]
 ```
+# #######################################################
+<h1 id="1.0.12">[1.0.12][20210428] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.12][20210428]
-+ `<es-menu>`
 - 新增props 参数[list-setting]：设置导航菜单数组[menu-list] 中菜单对象的属性值
+# #######################################################
+<h1 id="1.0.13">[1.0.13][20210428] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.13][20210428]
-+ `<es-menu>`
 - 修复[list-setting] 不配置时设置默认值
+# #######################################################
+<h1 id="1.0.14">[1.0.14][20210428] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.14][20210428]
-+ [upd] `<es-menu>`
 - 修复子菜单点击触发实参非当前点击子菜单对象问题
+# #######################################################
+<h1 id="1.0.15">[1.0.15][20210506] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.15][20210506]
-+ [crt] 添加 `<es-tabs>` 标签页
 - 继承 `<el-tabs>`
 - 通过新增属性[list-setting] 设置传入标签页数组[tab-list] 中对象属性值
 ```javascript
@@ -76,9 +98,9 @@
 - 通过[query-list] 配置查询条件表单
 - 通过[button-list] 配置查询/重置按钮，默认自带
 
+# #######################################################
+<h1 id="1.0.16">[1.0.16][20210518] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.16][20210518]
-+ [upd] `<es-crumb>` 组件
 - 新增prop[button-event-invoke-body]，用于传入给其子组件`<es-button-group>` 作为事件调用时查找父类组件中的事件
 - 修改`<es-crumb>` 组件默认宽度样式为100%
 
@@ -97,9 +119,9 @@
 - 配置[quick-filter] 时，最好配置@query-event 供快捷按钮调用事件
 - [quick-filter] [extra-operate] 数组属性同`<es-button-group>`，注：[quick-filter] item 新增属性[default(Object)] 用于传递快捷过滤按钮条件
 
+# #######################################################
+<h1 id="1.0.17">[1.0.17][20210519] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.17][20210519]
-+ [upd] `<es-table>` 组件
 - 添加组件快捷过滤按钮切换选中样式，配置默认选中[quick-filter] 数组中item 指定type，如type: primary；如需指定切换后选中样式（对标element-ui 按钮样式），则item 需配置clickTrigger（默认primary），如clickTrigger: primary；
 - 说明：快捷过滤按钮目前不支持配置独立clickEvent，只能通过配置公共query-event 实现事件回调；
 - 列表标题字段通过title 属性进行默认值设置（无法动态变动）；如需根据列表参数动态变化展示内容，则可通过插槽`<template slot='title'></template>` 进行配置；
@@ -120,9 +142,9 @@
 - visible 属性，可见参数配置由原Boolean 扩展支持Array 传入判断按钮显示/隐藏；
 - 追加不可见参数配置invisible ，同visible属性；
 - visible/invisible 值类型为Array 时通过执行相应方法checkVisible/checkInvisible 进行判断显示/隐藏；
+# #######################################################
+<h1 id="1.0.18">[1.0.18][20210520] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.18][20210520]
-1. `<es-table>` 组件
 - [del] 由于继承会出现错误提示`Error in mounted hook: "TypeError: Cannot read property 'addEventListener' of undefined`，故移除`<el-table>` 继承关系；
 - [add] 添加完善分页插件`<el-pagination>`，集成到`<es-table>` 组件中，通过[pager-setting] 设置请求时用的“currentPage”、“pageSize” 字段名；
 ```html
@@ -189,8 +211,8 @@
 - [upg] `<es-query>` 条件查询控件，“查询”、“重置”功能会重置当前分页参数{currentPage: 1}；若分页参数值非默认值“currentPage”，可通过[pagerSetting] 进行配置；
 
 
-# [1.0.19][20210521]
-1. `<es-query>` 组件
+<h1 id="1.0.10">[1.0.19][20210521] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
 - [upd] 需隐藏搜索栏label 时，可配置[label-width] 为0、''；
 
 2. `<es-button-group>` 组件
@@ -296,9 +318,9 @@ validateCustomList = [
 ]
 ```
 
+# #######################################################
+<h1 id="1.0.20">[1.0.20][20210524] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.20][20210524]
-1. `<es-form>`
 - [crt] 通过[form-columns] 配置表单字段，通过[form-setting] 配置表单布局样式，通过[button-list] 配置按钮，通过[validate-custom-list] 配置自定义校验规则；
 - 使用该组件相关组件有`<es-query>`/`<es-dialog-form>`；
 - 触发表单提交按钮事件为当前组件`<es-form>`/`<es-query>`/`<es-dialog-form>` 中配置回调方法 @submit-event，回调参数为表单对象；
@@ -386,17 +408,17 @@ function translateToObject (statusArray) {
   return _obj
 }
 ```
+# #######################################################
+<h1 id="1.0.21">[1.0.21][20210525] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.21][20210525]
-1. `<es-form>` 
 - [upg] 新增支持地址address\文件上传file;
 
 2. `<es-upload>` 
 - [init]
 
+# #######################################################
+<h1 id="1.0.22">[1.0.22][20210527] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.22][20210527]
-1. `<es-upload>`
 - [crt] 默认不对上传成功后数据处理（即对表单字段进行赋值操作），需要通过配置在页面中配置[onSuccess] 方法，在页面中进行操作；
 - [upg] 默认集成文件上传、文件修改、文件移除、文件预览功能；
 - [upg] 通过type（file/preview） 控制上传/预览状态切换；
@@ -442,33 +464,35 @@ var formColumns = [
   }
 ]
 ```
+# #######################################################
+<h1 id="1.0.23">[1.0.23][20210528] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.23][20210528]
-1. `<es-button-group>`
 - 修改按钮组事件调用方式，[button-list] 数组按钮对象clickEvent 属性，如果传入值为Function 则调用当前组件中的同名方法；如果传入值为String，且配置assignCurrentParent=true，则调用中间件同名方法，否则调用`<es-button-group>` 组件中的同名方法；
 
 2. [init] 新增组件使用说明文档
 
+# #######################################################
+<h1 id="1.0.24">[1.0.24][20210529] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.24][20210529]
-1. 更新依赖包
-
-# [1.0.25]
+# #######################################################
+<h1 id="1.0.25">[1.0.25] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
 - 
-
-# [1.0.26]
+# #######################################################
+<h1 id="1.0.26">[1.0.26] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
 1. 修复less-loader 版本过高异常，对应版本less@3.0.0，less-loader@5.0.0；
 
+# #######################################################
+<h1 id="1.0.27">[1.0.27][20210531]  <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.27][20210531] 
 1. 修复在template 中直接使用new Error 报错异常；
+
 2. `<es-aside>`
-- [init] 初始化；
 
+# #######################################################
+<h1 id="1.0.28">[1.0.28][20210610] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
-# [1.0.28][20210610]
 1. `<es-crumb>`
 - [upg] 添加面包屑前缀icon 配置项[props:prefix-icon]及插槽[slot:prefix-icon]； 
 - 说明1：配置项[props:prefix-icon] 优先级高于插槽[slot:prefix-icon] 优先级；
@@ -532,3 +556,10 @@ var formColumns = [
 
 6. `./package.json`
 - [upd] 修复未引入时间格式化包**momentJS**；
+
+
+# #######################################################
+<h1 id="1.0.29">[1.0.29][20210610] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `./demo/example.md` `./CHANGELOG.md`
+- [upg] 添加页内定位锚点；
