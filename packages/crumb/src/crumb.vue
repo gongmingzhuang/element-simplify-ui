@@ -6,6 +6,25 @@
         :separator-class="separatorClass"
       >
         <template v-for="(item, index) of crumbList">
+          <!-- [20210610] prefix-icon -->
+          <template v-if="index==0">
+            <div class="crumb-prefix">
+              <template v-if="!prefixIcon">
+                <slot name="prefix-icon"></slot>
+              </template>
+              <template v-else-if="typeof(prefixIcon) === 'string'" >
+                <i :class="prefixIcon"/>
+              </template>
+              <template v-else-if="typeof(prefixIcon) === 'object' && prefixIcon.className && !prefixIcon.to" >
+                <i :class="prefixIcon.className"/>
+              </template>
+              <template v-else>
+                <router-link :to="prefixIcon.to">
+                  <i :class="prefixIcon.className"/>
+                </router-link>
+              </template>
+            </div>
+          </template>
           <template v-if="item[listSetting.to || 'to']">
             <el-breadcrumb-item
               :to="{ path: item[listSetting.to || 'to'] }"
@@ -62,19 +81,33 @@ export default {
           replace: 'replace',
         }
       },
+    },
+    // [20210610] 面包屑前缀icon 配置
+    prefixIcon: {
+      type: [Object, String]
     }
   },
   methods: {}
 }
 </script>
-<style>
+<style lang="less">
 .es-crumb {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  margin-bottom: 10px;
   padding: 10px;
   background: #fff;
   border-radius: 5px;
+  .el-breadcrumb{
+    display: flex;
+    align-items: center;
+  }
+  .crumb-prefix{
+    float: left;
+    margin-right: 5px;
+  }
+
 }
 </style>

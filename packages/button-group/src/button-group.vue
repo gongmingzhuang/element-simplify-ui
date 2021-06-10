@@ -14,7 +14,6 @@
         checkInvisible(scope, item[buttonListSetting.invisible || 'invisible']) : 
         typeof(item[buttonListSetting.invisible || 'invisible']) == 'boolean' ? 
         item[buttonListSetting.invisible || 'invisible'] : 
-
         'true'"
         :key="index"
         :size="item[buttonListSetting.size || 'size']"
@@ -118,11 +117,10 @@ export default {
     // @param {object} e - 当前点击元素对象
     // [20210520][upd] 在点击快捷过滤按钮时，重置当前分页
     handelClick(item, index, e) {
-      debugger
       let _param = {}
       _param[this.pagerSetting['currentPage' || 'currentPage']] = 1
       Object.assign(_param, item.default)
-      this.$emit('query-event', _param)
+      this.$emit('submit-event', _param)
       this.changeButtonActive(e, item, index)
     },
     // [20210519][crt] 通过原生dom 操作实现，切换快捷过滤按钮选中状态

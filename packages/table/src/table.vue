@@ -32,7 +32,6 @@
           :data="data"
           v-bind="$attrs"
           v-on="$listeners"
-          
         >
           <template v-for="(item, index) in tableColumns">
             <el-table-column
@@ -46,7 +45,7 @@
               v-else-if="!item.fixed"
               :label="item.label"
               :prop="item.prop"
-              :width="item.width||''"
+              :min-width="item.width||''"
               :align="item.align||'center'"
               :show-overflow-tooltip="item.showOverflowTooltip||false"
               :key="'table'+index"
@@ -54,7 +53,13 @@
               <template slot-scope="{row}">
                 <!-- 状态值解析 -->
                 <template v-if="item.translate">
-                  {{item.translate[row[item.prop]] || item.translate['default']}}
+                  <template v-if="item.tagSetting">
+                    <el-tag :type='item.tagSetting[row[item.prop]] ? item.tagSetting[row[item.prop]] : item.tagSetting.default'>{{item.translate[row[item.prop]] || item.translate['default']}}</el-tag>
+                  </template>
+                  <template v-else>
+                    {{item.translate[row[item.prop]] || item.translate['default']}}
+                  </template>
+
                 </template>
                 <!-- 日期格式化 -->
                 <template v-else-if="item.dateFormat">
@@ -249,14 +254,14 @@ export default {
     handleCurrentChange(currentPage){
       let _param = {}
       _param[this.pagerSetting['currentPage'] || 'currentPage'] = currentPage
-      this.$emit('query-event', _param)
+      this.$emit('submit-event', _param)
     },
     // [20210520][crt] 分页
     handleSizeChange(pageSize){
       let _param = {}
       _param[this.pagerSetting['currentPage'] || 'currentPage'] = 1
       _param[this.pagerSetting['pageSize'] || 'pageSize'] = pageSize
-      this.$emit('query-event', _param)
+      this.$emit('submit-event', _param)
     },
     handleSelectionChange(selectedItems){
       debugger

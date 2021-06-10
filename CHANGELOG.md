@@ -466,3 +466,69 @@ var formColumns = [
 1. 修复在template 中直接使用new Error 报错异常；
 2. `<es-aside>`
 - [init] 初始化；
+
+
+# [1.0.28][20210610]
+1. `<es-crumb>`
+- [upg] 添加面包屑前缀icon 配置项[props:prefix-icon]及插槽[slot:prefix-icon]； 
+- 说明1：配置项[props:prefix-icon] 优先级高于插槽[slot:prefix-icon] 优先级；
+- 说明2: 配置项[props:prefix-icon] 该值可为object 和string；
+- 说明3: 配置项为string 时，必需为[icon] class；
+- 说明4：配置项为object 时，该对象为{className, to}，className（必填） 对应icon class，to（可选） 对应点击跳转路由；
+```html
+  <!-- 示例 -->
+  <es-crumb
+    :prefix-icon="{
+      className: 'el-icon-position crumb-icon',
+      to: '/'
+    }"
+  >
+    <template slot="prefix-icon">
+      <router-link to="/">
+        <i class="el-icon-position crumb-icon"></i>
+      </router-link>
+    </template>
+  </es-crumb>
+```
+2. `<es-query>`
+- [upd] 修复‘查询’按钮点击无法触发查询操作；
+- 说明1: `<es-query>` 配置触发查询的事件为[@submit-event]，形参为表单对象；
+- 说明2: 暂不推荐传入[button-list] 重置默认按钮；
+
+3. `<es-form>`
+- [upg][form-setting:itemWidth(String)] 添加自定义设置item 宽度配置；
+
+4. `<es-table>`
+- [upg][table-columns[object:tagSetting(object)]] 添加状态值设置`<el-tag>` 配置；
+- 说明1： 列表对应字段必须含有[object:translate(object)] 属性，且[tagSetting(object)] 值和[translate(object)] 对应；
+- 说明2：[tagSetting(object)] 可设置默认值[default]，当状态值匹配不到时，取该值；
+- 说明3：[tagSetting(object)] 可设置值对应element-ui `<el-tag>` 中的[type]；
+```html
+    <!-- 示例 -->
+    <es-table
+      @submit-event="getList"
+      :table-columns="[
+        { label: '状态', prop: 'status', 
+          translate: { 
+            1: '已生效', 
+            2: '回退', 
+            3: '禁用', 
+            0: '未生效'
+          }, 
+          tagSetting: {
+            0: 'info',
+            1: 'success',
+            3: 'danger',
+            'default': 'warning'
+          }
+        }
+      ]"
+    />
+```
+
+5. `./demo/example.md`
+- [upd] 修改`<es-table>` 中[TableEvent] 列表查询方法为**submit-event**(原为 query-event)；
+- [upd] 更新当前版本修改的变动；
+
+6. `./package.json`
+- [upd] 修复未引入时间格式化包**momentJS**；

@@ -14,6 +14,7 @@ import EsUpload from "../packages/upload/index"
 import 'element-ui/lib/theme-chalk/index.css'
 import '../lib/css/public.css'
 import ElementUI from 'element-ui'
+import Moment from 'moment'
 
 const components = [
   EsAside,
@@ -33,6 +34,7 @@ const components = [
 const install = Vue => {
   // [20210531][upd] 修复在template 中直接使用new Error 报错异常
   Vue.prototype.Error = Error
+  Vue.prototype.$moment = Moment
   Vue.use(ElementUI)
   components.forEach(component => {
     Vue.component(component.name, component);

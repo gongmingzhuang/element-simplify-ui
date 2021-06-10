@@ -20,6 +20,8 @@
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 |参数|说明|类型|可选值|默认值|常用值|
 --|:--|:--:|:--|:--|:--
 ref|ref标识|string|--|--|--
@@ -42,6 +44,8 @@ buttonName|不推荐配置，[button-list] 中配置按钮名字对应替换字�
 ### Button-list
 
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 属性名|说明|类型|可选值|默认值
 --|:--|:--|:--|:--
 `*` buttonName|按钮名称，可通过[button-list-setting] 变更，但不推荐|string|--|--
@@ -73,6 +77,8 @@ invisible|按钮是否隐藏<br>（1）boolean false-显示 <br> （2）array �
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
 ref|ref标识|string|--|--
@@ -80,12 +86,20 @@ ref|ref标识|string|--|--
 listSetting|面包屑数组元素对象属性名配置，不推荐使用|object|--|{crumbName: 'crumbName', to: 'to', replace: 'replace'}
 button-list-setting|按钮数组元素对象属性名配置，见`<es-button-group>`|object|--|--
 button-list|右侧按钮数组，见`<es-button-group>`|array|--|--
+prefix-icon <sup>[1.0.28]</sup>| 添加面包屑前缀icon配置项，如需自定义配置，也可通过插槽[slot:prefix-icon]，优先级低于配置项|string/object|--|--
+
+&nbsp;
+
+- 说明1：[prefix-icon] 配置项为string 时，必需为[icon] class，对应element-ui icon；
+- 说明2：[prefix-icon] 配置项为object 时，该对象为{className, to}，className（必填） 对应icon class，to（可选） 对应点击跳转路由；
 
 &nbsp;
 
 ### Crumb-list
 
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 
 属性名|说明|类型|可选值|默认值
 --|:--|:--:|:--|:--
@@ -101,6 +115,10 @@ replace|在使用 to 进行路由跳转时，启用 replace 将不会向 history
         { crumbName: '基础管理'},
         { crumbName: '个人中心' }
       ]"
+  :prefix-icon="{
+      className: 'el-icon-position crumb-icon',
+      to: '/'
+    }"
   :button-list="[
         { buttonName: '添加', size: 'mini', clickEvent: openDialog, assignCurrentParent: true, visible: /添加/.test(btnJur) && stackArray.length === 1 },
         { buttonName: '返回上一级', size: 'mini', type: 'success', clickEvent: 'stackBack', visible: stackArray.length > 1},
@@ -116,6 +134,8 @@ replace|在使用 to 进行路由跳转时，启用 replace 将不会向 history
 
 ### Dialog Attribute
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
@@ -149,6 +169,8 @@ button-list|右侧按钮数组，见`<es-button-group>`|array|--|--
 
 ### Dialog-form Attribute
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
@@ -199,11 +221,13 @@ validate-custom-list|同`<es-form>`，表单新增校验规则定义数组|array
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
 |ref|ref标识|string|--|--|
 label-width|表单label宽度（统一配置），不配置不显示label|string|--|--
-form-setting|表单布局配置，col-表示一行有多少个字段，itemWrap-表示label与input是否换行显示|object|--|{col:1, itemWrap: false}
+form-setting|表单布局配置，col-表示一行有多少个字段，itemWrap-表示label与input是否换行显示，itemWidth<sup>[1.0.28]</sup>(string，e.g. '100px')-标识所有**form-item** 采用固定宽度|object|--|{col:1, itemWrap: false}
 `*` form-columns|表单字段配置（详见下面具体说明）|array|--|--
 `*` button-list|表单操作提交按钮配置|array|--|--
 validate-custom-list|表单新增校验规则定义数组，|array|--|--
@@ -235,6 +259,8 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 属性名|说明|类型|可选值|默认值
 --|:--|:--|:--|:--
 label|字段名|string|--|--
@@ -255,6 +281,8 @@ resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“�
 ### Form Event
 
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 
 事件名|说明|参数
 --|:--|:--
@@ -323,6 +351,8 @@ resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“�
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
 |ref|ref标识|string|--|--|
@@ -341,6 +371,8 @@ button-list|条件查询按钮，详见`<es-button-group>`|array|--|[<br>&nbsp;&
 ### Query Event
 
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 
 事件名|说明|参数
 --|:--|:--
@@ -376,6 +408,8 @@ button-list|条件查询按钮，详见`<es-button-group>`|array|--|[<br>&nbsp;&
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 |参数|说明|类型|可选值|默认值|
 --|:--|:--:|:--|:--
 |ref|ref标识|string|--|--|
@@ -397,6 +431,8 @@ pager|分页数据|object|--|{currentPage: 1, pageSize: 10, totalPage: 0, total:
 ### Quick-filter
 
 `* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
 属性名|说明|类型|可选值|默认值
 --|:--|:--|:--|:--
 `*` buttonName|按钮名称，可通过[button-list-setting] 变更，但不推荐|string|--|--
@@ -409,12 +445,15 @@ default|[`<es-table>` 限定] 快捷过滤条件对象，即设置具体查询�
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 属性名|说明|类型|可选值|默认值
 --|:--|:--|:--|:--
 `*` label|字段名|string|--|--
 `*` prop|字段属性名|string|--|--
 type|**[selection 限定]** 列表中存在多选框列时需要配置，数据展示列不需配置|string|selection|--
 width|列宽，一般除固定宽度列需要设置，其余列不推荐设置|number|--|--
+tagSetting<sup>[1.0.28]</sup>|状态值设置`<el-tag>` 配置，取值对应elemeng-ui `<el-tag>` 中的[type]|object|--|--
 translate|状态值解析对象，有别于`<es-form>` 中状态值选项是数组|object|--|--
 moneyFormat|金额格式化，默认按千进添加逗号（,），保留两位小数，配置[ **moneyFormat={decimal: 3}** ] 可以配置保留小数位数，若按默认值进行格式化，则[ **moneyFormat=1** ] 或[ **moneyFormat=true** ] 即可|object/number/boolean|--|--
 dateFormat|日期格式化，默认格式[ **YYYY-MM-DD HH:mm:ss** ]，如按默认格式格式化，则[ **dateFormat=1** ] 或[ **dateFormat=true** ] 即可；如需自定义格式化[dateFormat] 传入具体的日期格式即可|string/number/boolean|--|--
@@ -422,20 +461,26 @@ fixed|列是否固定在左侧或者右侧，true 表示固定在左侧，同ele
 align|对齐方式，同element-ui `<el-table>` align|string|left/center/right|center
 
 
+&nbsp;
+
+- 说明1：列表对应字段必须含有[object:translate(object)] 属性，且[tagSetting(object)] 值和[translate(object)] 对应；
+- 说明2：[tagSetting(object)] 可设置默认值[default]，当状态值匹配不到时，取该值；
 
 &nbsp;
 ### Table Event
 
 `* 为必填项`
 
+`[*.*.*] - 于指定版本新增`
+
 事件名|说明|参数
 --|:--|:--
-`*` query-event|列表查询方法，用于快捷条件过滤，分页查询，返回值为条件查询对象|Function(object)
+`*` submit-event|列表查询方法，用于快捷条件过滤，分页查询，返回值为条件查询对象|Function(object)
 selection-change|**[selection 限定]** 用于列表多选框变动时触发|Function(array)
 
 &nbsp;
 
-- 说明1：**query-event** 由于条件查询涉及多个组件（`<es-query>`、`<es-table> `快捷过滤按钮、`<es-table>`分页器）数据，所以请求前需要对这些数据进行合并，在发送请求；
+- 说明1：**submit-event** 由于条件查询涉及多个组件（`<es-query>`、`<es-table> `快捷过滤按钮、`<es-table>`分页器）数据，所以请求前需要对这些数据进行合并，在发送请求；
 ```javascript
     getList(params) {
       // 整合条件参数
@@ -448,7 +493,7 @@ selection-change|**[selection 限定]** 用于列表多选框变动时触发|Fun
 ```html
 <!-- 示例 -->
     <es-table
-      @query-event="getList"
+      @submit-event="getList"
       @selection-change="handleSelectionChange"
       :quick-filter="[
         {buttonName: '全部', type:'primary', default: { status: ''}},
@@ -465,7 +510,20 @@ selection-change|**[selection 限定]** 用于列表多选框变动时触发|Fun
         { label: '企业名称', prop: 'companyName', width: 200 },
         { label: '信用代码', prop: 'businessLicenseCode', width: 250 },
         { label: '已开通服务', prop: 'capitalNames' },
-        { label: '状态', prop: 'status', translate: status(1) },
+        { label: '状态', prop: 'status', 
+          translate: {
+              1: '已生效', 
+              2: '回退', 
+              3: '禁用', 
+              0: '未生效'
+            },
+          tagSetting: {
+            0: 'info',
+            1: 'success',
+            3: 'danger',
+            'default': 'warning'
+          }
+        },
         { label: '审批状态', prop: 'approveStatus', translate: approveStatus() },
         { label: '企业来源', prop: 'companyFrom', translate: companyFrom() },
         { label: '子公司数', prop: 'sonNumber', width: 90, moneyFormat: 1 },

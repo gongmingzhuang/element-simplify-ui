@@ -10,6 +10,7 @@
       v-bind="$attrs"
       v-on="$listeners"
       :button-list="buttonList"
+      :current="this"
     />
   </div>
 </template>
@@ -37,8 +38,8 @@ export default {
       type: Array,
       default: ()=>{
         return [
-          { buttonName: '查询', type: 'primary', clickEvent: 'query' },
-          { buttonName: '重置', type: '', clickEvent: 'reset' }
+          { buttonName: '查询', type: 'primary', clickEvent: 'query', assignCurrentParent: true },
+          { buttonName: '重置', type: '', clickEvent: 'reset', assignCurrentParent: true }
         ]
       },
     },
@@ -74,6 +75,7 @@ export default {
 </script>
 <style>
 .es-query{
+  margin-bottom: 10px;
   padding: 10px;
   background: #fff;
   border-radius: 5px;
@@ -86,8 +88,9 @@ export default {
   flex-wrap: wrap;
 }
 .es-query .el-form .el-form-item{
-  /* display: flex;
-  padding-right: 20px; */
+  padding: 0 1%;
+  /* display: flex; */
+  /* padding: 10px 10px 0 10px; */
 }
 .es-query .el-form-item__content{
   /* width: 100%;

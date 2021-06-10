@@ -16,9 +16,10 @@
           >{{item.label}}</p>
         </template>
         <!-- [upg][20210524] 支持分列表单 -->
+          <!-- :style="{width: `calc(100% - ${formSetting.col}) / ${ formSetting.col || 1})`}" -->
         <el-form-item
           v-else
-          :style="{width: 'calc(100%/' + ( formSetting.col || 1)+')'}"
+          :style="{width: formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="formSetting.itemWrap ? ' item-wrap' : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
           :label-width="labelWidth || item.labelWidth"
