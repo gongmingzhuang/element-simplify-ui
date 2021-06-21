@@ -277,8 +277,8 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
 --|:--|:--|:--|:--
 label|字段名|string|--|--
 `*` prop|字段属性名|string|--|--
-type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围|text
-validate|字段校验规则|array[string]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）|--
+type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型|text
+validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）|--
 translate|**[radio/select 限定]** 单选框/下拉框可选值配置|array[object]|--|--
 valueType|**[address 限定]** 地址选择框值类型|string|text-中文地址（例："北京市市辖区东城区"）<br> code-地址编码组合(例："110000,110100,110101")|text
 `*` props|**[dateRange 限定]** 日期范围选择框对应prop，必填项|array[string]|--|--
@@ -288,6 +288,8 @@ beforeUpload|[file 限定] 用于覆盖`<es-upload>` beforeUpload 方法，返�
 `*` onSuccess|**[file 限定]** 必填项，文件上传成功后，表单字段赋值处理，Function({form,prop,result})，form-表单对象，prop-当前文件字段，result-上传成功后响应对象|function|--|--
 onPdfPreview|**[file 限定]** 对于预览pdf 格式的预处理（转Blob）方法，Function(filepath)，filepath-pdf文件路径|function|--|--
 resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“查看”按钮，只能通过“变更”替换字段值，开启resetButton 功能后，新增一个“移除”按钮，可清空当前file 字段值|boolean|--|false
+minlength <sup>[1.0.30]</sup>|**[validate[v-minlength] 限定]** 校验规则限定，控制最少需输入位数|number|--|--
+refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配置验证码刷新方法，其中event-为事件对象，formColumnItem-为对应**form-columns**元素，codeConfig({path})-为验证码图片配置属性，通过将验证码图片路径传递给codeConfig.path 即可显示验证码，并支持点击验证码刷新|function(event,formColumnItem,codeConfig)|--|--
  
 &nbsp;
 ### Form Event

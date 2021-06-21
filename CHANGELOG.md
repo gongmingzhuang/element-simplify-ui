@@ -19,6 +19,7 @@
 * <a href="#1.0.27">[1.0.27]</a>
 * <a href="#1.0.28">[1.0.28]</a>
 * <a href="#1.0.29">[1.0.29]</a>
+* <a href="#1.0.30">[1.0.30]</a>
 
 # #######################################################
 <h1 id="1.0.0">[1.0.0-alpha][20210427] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
@@ -563,3 +564,24 @@ var formColumns = [
 
 1. `./demo/example.md` `./CHANGELOG.md`
 - [upg] 添加页内定位锚点；
+
+
+# #######################################################
+<h1 id="1.0.30">[1.0.30][20210621] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-form>`
+- [crt] 新增支持密码类型，对应[form-columns-item] 属性[type：password]；
+- [crt] 新增支持验证码类型，对应[form-columns-item] 属性[type：code]，需要配置验证码刷新方法，对应[form-columns-item] 属性[refreshEvent(event,formColumnItem,codeConfig)]，其中event-为事件对象，formColumnItem-为对应**form-columns**元素，codeConfig({path})-为验证码图片配置属性，通过将验证码图片路径传递给codeConfig.path 即可显示验证码，并支持点击验证码刷新；
+- [upg] 校验规则新增支持最少位数输入校验，对应[form-columns-item][validate]校验数组元素为**v-minlength**，对应[form-columns-item]属性**minlength(Number)**；
+- [upg] [form-columns-item][validate]校验数组元素支持传入对象元素{validator: 'v-required', message: '必填项'}，用于重置默认**message**；
+```html
+  <es-form
+    ref="es-form"
+    @submit-event="submitDialogForm"
+    :form-columns="[
+      { label: '手机号', prop: 'companyName', validate: ['v-required'] },
+      { label: '登录密码', prop: 'businessLicenseCode', type: 'password', minlength: 6, validate: ['v-required', 'v-minlength'] },
+      { label: '验证码', prop: 'createOperator', type: 'code', validate: ['v-required', 'v-numx'], refreshEvent: refreshCode }
+    ]"
+  />
+```
