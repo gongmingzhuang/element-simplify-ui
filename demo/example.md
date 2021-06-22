@@ -277,7 +277,7 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
 --|:--|:--|:--|:--
 label|字段名|string|--|--
 `*` prop|字段属性名|string|--|--
-type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型|text
+type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型<br> slot <sup>[1.0.31]</sup>-插槽类型（通过该类型可自定义表单元素）<br>|text
 validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）|--
 translate|**[radio/select 限定]** 单选框/下拉框可选值配置|array[object]|--|--
 valueType|**[address 限定]** 地址选择框值类型|string|text-中文地址（例："北京市市辖区东城区"）<br> code-地址编码组合(例："110000,110100,110101")|text
@@ -316,7 +316,7 @@ refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配�
       }"
       :form-columns="[
         { label: '基本信息', type: 'title' },
-        { label: '企业名称', prop: 'companyName', validate: ['v-required'] },
+        { label: '企业名称', prop: 'companyName', type: 'slot', validate: ['v-required'] },
         { label: '信用代码', prop: 'businessLicenseCode', validate: ['v-required', 'v-number'] },
         { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-numx'] },
         { label: '状态值', prop: 'status2', type: 'radio', validate: ['v-required'], translate: status(0, 1) },
@@ -325,8 +325,9 @@ refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配�
         { label: '头像', prop: 'avatar', type: 'file', validate: ['v-required'], setting: { accept: ['jpg','png'], fileSize: 1, action: 'http://192.168.200.203:8099/index/upload'}, beforeUpload: false, onSuccess: fileSetting, onPdfPreview: pdfPreview, resetButton: true },
         { label: '基本信息', type: 'title' },
         { label: '创建时间', prop: 'dateRange', props: ['start', 'end'], type: 'dateRange', validate: ['v-required']},
-        { label: '密码', prop: 'pwd', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
-        { label: '确认密码', prop: 'rpwd', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+        { label: '密码', prop: 'pwd', type: 'password', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
+        { label: '确认密码', prop: 'rpwd',type: 'password', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
+        { label: '验证码', prop: 'createOperator', type: 'code', validate: ['v-required', 'v-numx'], refreshEvent: refreshCode }
       ]"
       :button-list="[
         { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
@@ -348,7 +349,12 @@ refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配�
             }
         }
       ]"
-    />
+    >
+      <!-- [1.0.31] 新增 -->
+      <template slot="companyName" slot-scope="scope">
+        <el-input v-model="scope.form[scope.item.prop]" maxlength="3"/>
+      </template>
+    </es-form>
 ```
 
 &nbsp;

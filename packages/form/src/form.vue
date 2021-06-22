@@ -8,6 +8,17 @@
       :rules="rules"
     >
       <template v-for="(item, index) of formColumns">
+        <!-- [upg][20210622] 前置插槽，不推荐使用 -->
+        <div
+          class="prefix-slot"
+          v-if="item.prefix"
+        >
+          <slot
+            :name="`${item.prop}-prefix`"
+            :form="form"
+            :item="item"
+          />
+        </div>
         <!-- [upg][20210524] 标题 -->
         <template v-if="item.type=='title'">
           <p
@@ -26,131 +37,149 @@
           :key="index"
           :prop="item.prop"
         >
-          <!-- 输入框 -->
-          <template v-if="item.type=='text' || !item.type">
-            <el-input
-              v-model.trim="form[item.prop]"
-              :placeholder="item.placeholder || '请输入' + item.label"
-              :maxlength="item.maxlength"
-            ></el-input>
-          </template>
-          <!-- [crt][20210621] 密码框 -->
-          <template v-if="item.type=='password'">
-            <el-input
-              :type="passwordConfig[item.prop].show ? 'text': 'password'"
-              v-model.trim="form[item.prop]"
-              :placeholder="item.placeholder || '请输入' + item.label"
-              :maxlength="item.maxlength"
-            >
-              <i
-                class="el-icon-view"
-                slot="suffix"
-                @click="passwordConfig[item.prop].show = !passwordConfig[item.prop].show"
+          <div class="es-form-item">
+            <!-- 输入框 -->
+            <template v-if="item.type=='text' || !item.type">
+              <el-input
+                v-model.trim="form[item.prop]"
+                :placeholder="item.placeholder || '请输入' + item.label"
+                :maxlength="item.maxlength"
+              ></el-input>
+            </template>
+            <!-- [crt][20210621] 密码框 -->
+            <template v-if="item.type=='password'">
+              <el-input
+                :type="passwordConfig[item.prop].show ? 'text': 'password'"
+                v-model.trim="form[item.prop]"
+                :placeholder="item.placeholder || '请输入' + item.label"
+                :maxlength="item.maxlength"
+              >
+                <i
+                  class="el-icon-view"
+                  slot="suffix"
+                  @click="passwordConfig[item.prop].show = !passwordConfig[item.prop].show"
+                />
+                <!-- @mouseout="passwordConfig[item.prop].show = false" -->
+              </el-input>
+            </template>
+            <!-- [crt][20210621] 验证码框 -->
+            <template v-if="item.type=='code'">
+              <div class="code">
+                <div class="code-left">
+                  <el-input
+                    v-model.trim="form[item.prop]"
+                    :placeholder="item.placeholder || '请输入' + item.label"
+                    :maxlength="item.maxlength"
+                  />
+                </div>
+                <div
+                  class="code-right"
+                  @click="e => item.refreshEvent(e, item, codeConfig[item.prop])"
+                >
+                  <img
+                    :src="codeConfig[item.prop].path"
+                    :id="item.prop+'_code'"
+                  />
+                </div>
+              </div>
+            </template>
+            <!-- 单选框 -->
+            <template v-if="item.type=='radio'">
+              <el-radio-group v-model="form[item.prop]">
+                <template v-for="(itm,idx) in item.translate">
+                  <el-radio
+                    :key="index+'_'+itm.value"
+                    :label="itm.value"
+                  >{{itm.label}}</el-radio>
+                </template>
+              </el-radio-group>
+            </template>
+            <!-- 下拉选择框 -->
+            <template v-if="item.type=='select'">
+              <el-select
+                v-model="form[item.prop]"
+                :placeholder="item.placeholder || '请选择'"
+              >
+                <el-option
+                  v-for="itm in item.translate"
+                  :key="itm.value"
+                  :label="itm.label"
+                  :value="itm.value"
+                >
+                </el-option>
+              </el-select>
+            </template>
+            <!-- 省市区选择 -->
+            <template v-if="item.type=='address'">
+              <el-input
+                v-model="form[item.prop]"
+                v-show="false"
               />
-            </el-input>
-          </template>
-          <!-- [crt][20210621] 验证码框 -->
-          <template v-if="item.type=='code'">
-            <div class="code">
-              <div class="code-left">
-                <el-input
-                  v-model.trim="form[item.prop]"
-                  :placeholder="item.placeholder || '请输入' + item.label"
-                  :maxlength="item.maxlength"
-                />
-              </div>
-              <div
-                class="code-right"
-                @click="e => item.refreshEvent(e, item, codeConfig[item.prop])"
+              <el-cascader
+                size="large"
+                :options="regionOptions"
+                v-model="selectedRegionOptions"
+                @change="val=>handleChangeRegion(val,item)"
               >
-                <img
-                  :src="codeConfig[item.prop].path"
-                  :id="item.prop+'_code'"
-                />
-              </div>
+              </el-cascader>
+            </template>
+            <!-- 日期选择框 -->
+            <template v-if="item.type=='dateRange'">
+              <el-date-picker
+                @change="date => {dateFormatting(date, item)}"
+                v-model="form[item.prop]"
+                :format="item.format||'yyyy-MM-DD'"
+                :value-format="item.valueFormat||'yyyy-MM-DD HH:mm:ss'"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              />
+            </template>
+            <!-- 输入框 -->
+            <template v-if="item.type=='file' || item.type=='preview'">
+              <el-input
+                v-model="form[item.prop]"
+                v-show="false"
+              />
+              <es-upload
+                :type="item.type"
+                :action="item.setting.action || '/'"
+                :file-path="form[item.prop]"
+                :setting="item.setting"
+                :reset-button="item.resetButton"
+                :pdf-preview="item.onPdfPreview"
+                :before-upload="item.beforeUpload"
+                @on-success="res => handleOnSuccess(res,item)"
+                @on-reset="res=>handleOnReset(res,item)"
+              />
+            </template>
+            <!-- [crt][20210621] 兼容额外字段 -->
+            <template v-if="item.type=='slot'">
+              <slot
+                :name="item.prop"
+                :item="item"
+                :form="form"
+              />
+            </template>
+            <!-- [upg][20210622] 后置插槽 -->
+            <div
+              class="suffix-slot"
+              v-if="item.suffix"
+            >
+              <slot
+                :name="`${item.prop}-suffix`"
+                :form="form"
+                :item="item"
+              />
             </div>
-          </template>
-          <!-- 单选框 -->
-          <template v-if="item.type=='radio'">
-            <el-radio-group v-model="form[item.prop]">
-              <template v-for="(itm,idx) in item.translate">
-                <el-radio
-                  :key="index+'_'+itm.value"
-                  :label="itm.value"
-                >{{itm.label}}</el-radio>
-              </template>
-            </el-radio-group>
-          </template>
-          <!-- 下拉选择框 -->
-          <template v-if="item.type=='select'">
-            <el-select
-              v-model="form[item.prop]"
-              :placeholder="item.placeholder || '请选择'"
-            >
-              <el-option
-                v-for="itm in item.translate"
-                :key="itm.value"
-                :label="itm.label"
-                :value="itm.value"
-              >
-              </el-option>
-            </el-select>
-          </template>
-          <!-- 省市区选择 -->
-          <template v-if="item.type=='address'">
-            <el-input
-              v-model="form[item.prop]"
-              v-show="false"
-            />
-            <el-cascader
-              size="large"
-              :options="regionOptions"
-              v-model="selectedRegionOptions"
-              @change="val=>handleChangeRegion(val,item)"
-            >
-            </el-cascader>
-          </template>
-          <!-- 日期选择框 -->
-          <template v-if="item.type=='dateRange'">
-            <el-date-picker
-              @change="date => {dateFormatting(date, item)}"
-              v-model="form[item.prop]"
-              :format="item.format||'yyyy-MM-DD'"
-              :value-format="item.valueFormat||'yyyy-MM-DD HH:mm:ss'"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            />
-          </template>
-          <!-- 输入框 -->
-          <template v-if="item.type=='file' || item.type=='preview'">
-            <el-input
-              v-model="form[item.prop]"
-              v-show="false"
-            />
-            <es-upload
-              :type="item.type"
-              :action="item.setting.action || '/'"
-              :file-path="form[item.prop]"
-              :setting="item.setting"
-              :reset-button="item.resetButton"
-              :pdf-preview="item.onPdfPreview"
-              :before-upload="item.beforeUpload"
-              @on-success="res => handleOnSuccess(res,item)"
-              @on-reset="res=>handleOnReset(res,item)"
-            />
-          </template>
-          <!-- [crt][20210621] 兼容额外字段 -->
-          <template v-if="item.type=='slot'">
-            <slot
-              :name="item.prop"
-              slot-scope="item"
-            />
-          </template>
+          </div>
         </el-form-item>
       </template>
     </el-form>
+    <!-- [20210622] 表单元素追加插槽，支持两种方式 -->
+    <slot v-if="formSetting.appendSlot"></slot>
+    <slot name="append-slot"></slot>
     <span
       v-if="!isDialogForm && !isQueryForm"
       slot="footer"
@@ -173,6 +202,7 @@
  */
 /**
  * [20210621][upg] 新增控制输入框可清楚事件及按钮/密码框隐藏显示控制
+ * [20210622][crt] 新增插槽form-item 前置插槽/后置插槽/按钮组前置插槽
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
@@ -271,6 +301,10 @@ export default {
                 // 首次调用
                 item.refreshEvent(null, item, this.codeConfig[item.prop])
             }
+             // [20210622] 设置默认值
+            if(item.value){
+              this.$set(this.form, item.prop, item.value)
+            }
             if (item.type != 'title') {
                 this.$set(this.form, item.prop, '')
                 if (item.validate) {
@@ -299,6 +333,15 @@ export default {
                         })
                     }
                 }
+            }
+        })
+    },
+    mounted() {
+        // 添加默认值
+        this.formColumns.forEach(item => {
+            // [20210622] 设置默认值
+            if (item.value) {
+                this.$set(this.form, item.prop, item.value)
             }
         })
     },
@@ -405,6 +448,9 @@ export default {
         // [20210527][crt] 重置字段
         handleOnReset(res, item) {
             this.form[item.prop] = ''
+        },
+        updateFormColumns(){
+          this.$emit('updateList', this.formColumns)
         }
     }
 }
@@ -460,8 +506,29 @@ export default {
     width: 100%;
 }
 
-.es-form .code{ display: flex; }
-.es-form .code .code-left{ width: 60%; }
-.es-form .code .code-right{ width: 38%; height: 40px; margin-left: 2%; }
-.es-form .code img{  height: 100%; }
+.es-form .es-form-item {
+    display: flex;
+}
+.es-form .es-form-item .suffix-slot {
+    margin-left: 8px;
+}
+
+.es-form .code {
+    display: flex;
+    width: 100%;
+}
+.es-form .code .code-left {
+    width: 60%;
+}
+.es-form .code .code-right {
+    width: 38%;
+    height: 40px;
+    margin-left: 2%;
+}
+.es-form .code img {
+    height: 100%;
+}
+.es-form i.el-icon-view:hover {
+    color: #666;
+}
 </style>
