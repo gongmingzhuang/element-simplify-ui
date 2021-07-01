@@ -21,6 +21,7 @@
 -   <a href="#1.0.29">[1.0.29]</a>
 -   <a href="#1.0.30">[1.0.30]</a>
 -   <a href="#1.0.31">[1.0.31]</a>
+-   <a href="#1.0.32">[1.0.32]</a>
 
 #
 
@@ -686,5 +687,41 @@ var formColumns = [
     <!-- <template #userName="{item,form}"> -->
       <el-input v-model="form[item.prop]">
     </template>
+  </es-form>
+```
+
+#
+
+<h1 id="1.0.32">[1.0.32][20210701] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-form>`
+
+- [crt] 新增支持短信验证码类型，对应[form-columns-item] 属性[type：message]。配置项通过[form-columns-item：setting] 进行配置，可配置间隔获取验证码的时间（秒）。获取短信验证码请求通过[form-columns-item：requestEvent] 方法进行。
+- [upg][20210630]: [formColumnsItem:invisibleControl] - type: Function，return Boolean，新增可控制显示/隐藏表单操作。
+- [upg][20210630]: [formColumnsItem:setting.isWholeLine] - 新增单独控制对应字段占一整行。
+- [upg][20210630]: [formSetting:hideButton] - 控制是否显示按钮组。
+- [crt][20210630]: 新增[type:checkbox] - 复选框。
+- [crt][20210701]: 新增[type:txt] - 使用span 标签展示内容。
+- [crt][20210701]: [type:address] 地址控件支持“详细地址” 配置，通过[formColumnsItem:setting.detail{prop}]进行配置。
+- [crt][20210701]: 校验规则新增支持校验固话'v-phone'。
+- [crt][20210701]: 新增[formColumnsItem:setting.readonly]/[formColumnsItem:setting.disabled] 控制表单元素是否可编辑/操作。
+
+```html
+  <es-form
+    ref="es-form"
+    @submit-event="submitDialogForm"
+    :form-setting="{
+      hideButton: true
+    }"
+    :form-columns="[
+      { label: '账号', prop: 'userName', validate: ['v-required'], value: '13012341234' },
+      { label: '短信验证吗', prop: 'code', type: 'message', validate: ['v-required'], setting: { interval: 60 }, 
+      requestEvent: getCode }，
+      { label: '密码', prop: 'pwd', type: 'password', validate: ['v-required'], show: false, invisibleControl: this.invisibleControl, },
+      { label: '类型', type: 'checkbox', prop: 'coopType', translate: [ { label: '超市', value: 1 }], setting: { isWholeLine: true }, validate: ['v-required'] },
+      { label: '地址', type: 'slot', prop: 'addr', setting: { detail: { prop: 'addrDetail' } }, validate: ['v-required'], valueType: 'code' },
+      { label: '品牌', prop: 'blankName', type: 'txt' },
+    ]"
+  >
   </es-form>
 ```

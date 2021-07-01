@@ -239,7 +239,7 @@ validate-custom-list|同`<es-form>`，表单新增校验规则定义数组|array
 --|:--|:--:|:--|:--
 |ref|ref标识|string|--|--|
 label-width|表单label宽度（统一配置），不配置不显示label|string|--|--
-form-setting|表单布局配置，col-表示一行有多少个字段，itemWrap-表示label与input是否换行显示，itemWidth<sup>[1.0.28]</sup>(string，e.g. '100px')-标识所有**form-item** 采用固定宽度|object|--|{col:1, itemWrap: false}
+form-setting|表单布局配置<br> col-表示一行有多少个字段<br> itemWrap-表示label与input是否换行显示<br> itemWidth<sup>[1.0.28]</sup>(string，e.g. '100px')-标识所有**form-item** 采用固定宽度<br> hiddeButton<sup>[1.0.32]</sup> - 隐藏默认表单提交按钮，隐藏后可通过 this.$refs['es-form'].submit() 触发提交表单|object|--|{col:1, itemWrap: false}
 `*` form-columns|表单字段配置（详见下面具体说明）|array|--|--
 `*` button-list|表单操作提交按钮配置|array|--|--
 validate-custom-list|表单新增校验规则定义数组，|array|--|--
@@ -251,7 +251,7 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
   // validator 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
   {
     validName: 'v-number',
-    validator: function(item, Error){
+    validator: function(item){
       return function(rule, value, callback){
         if (!value) {
           return callback(Error(item.label + '不能为空'))
@@ -277,21 +277,30 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
 --|:--|:--|:--|:--
 label|字段名|string|--|--
 `*` prop|字段属性名|string|--|--
-type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型<br> slot <sup>[1.0.31]</sup>-插槽类型（通过该类型可自定义表单元素）<br>|text
-validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）|--
+type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型<br> slot <sup>[1.0.31]</sup>-插槽类型（通过该类型可自定义表单元素）<br> message <sup>[1.0.32]</sup>-短信验证码类型<br> checkbox<sup>[1.0.32]</sup> - 复选框<br> txt<sup>[1.0.32]</sup> - 展示类文本类型，使用span 标签|text
+validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）<br> v-phone - 固话校验，校验规则（/^\d{3}-\d{8}$\|^\d{4}-\d{7}$/）|--
 translate|**[radio/select 限定]** 单选框/下拉框可选值配置|array[object]|--|--
 valueType|**[address 限定]** 地址选择框值类型|string|text-中文地址（例："北京市市辖区东城区"）<br> code-地址编码组合(例："110000,110100,110101")|text
 `*` props|**[dateRange 限定]** 日期范围选择框对应prop，必填项|array[string]|--|--
 dependPropIndex|主从判断-依赖字段在当前form-columns 中的索引|number|--|--
 setting|**[file 限定]** 上传文件格式、文件大小、上传接口配置，accept[string]-支持文件格式配置，fileSize(number)-最大支持上传文件大小，action(string)上传接口|object|--|{accept:['jpg'],fileSize: 1}
+setting<sup>[1.0.32]</sup>|**[1.0.32 新增]** 通用配置项 |object|--|--
 beforeUpload|[file 限定] 用于覆盖`<es-upload>` beforeUpload 方法，返回true 触发上传，返回false 拦截上传|function|--
 `*` onSuccess|**[file 限定]** 必填项，文件上传成功后，表单字段赋值处理，Function({form,prop,result})，form-表单对象，prop-当前文件字段，result-上传成功后响应对象|function|--|--
 onPdfPreview|**[file 限定]** 对于预览pdf 格式的预处理（转Blob）方法，Function(filepath)，filepath-pdf文件路径|function|--|--
 resetButton|**[file 限定]** 默认上传文件成功后显示“变更”/“查看”按钮，只能通过“变更”替换字段值，开启resetButton 功能后，新增一个“移除”按钮，可清空当前file 字段值|boolean|--|false
 minlength <sup>[1.0.30]</sup>|**[validate[v-minlength] 限定]** 校验规则限定，控制最少需输入位数|number|--|--
 refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配置验证码刷新方法，其中event-为事件对象，formColumnItem-为对应**form-columns**元素，codeConfig({path})-为验证码图片配置属性，通过将验证码图片路径传递给codeConfig.path 即可显示验证码，并支持点击验证码刷新|function(event,formColumnItem,codeConfig)|--|--
- 
+requestEvent <sup>[1.0.32]</sup>|**[message 限定]** 短信验证码类型限定，配置触发短信请求方法|function(formColumnItem)|--|--
+invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作|function(formColumnItem){return Boolean}|--|--
 &nbsp;
+
+- 注1<sup>[1.0.32]</sup>：[type:message], setting{interval: 60, buttonType: 'primary'}，**interval** - 该属性设置每次请求短信的间隔时间（秒），默认为10s；**buttonType** - 该属性按钮类型，对应element-ui 中[button] 的**type**。
+- 注2<sup>[1.0.32]</sup>：[type:address]，setting{detail:{prop}}，配置detail 对象可使用详细地址字段；
+- 注2<sup>[1.0.32]</sup>：[formColumnsItem:setting.readonly]/[formColumnsItem:setting.disabled]，控制表单元素是否可编辑/操作，[type:input]-使用readonly，其余使用disabled;
+
+&nbsp;
+
 ### Form Event
 
 `* 为必填项`
@@ -316,18 +325,22 @@ refreshEvent <sup>[1.0.30]</sup>|**[code 限定]** 验证码类型限定，配�
       }"
       :form-columns="[
         { label: '基本信息', type: 'title' },
+        { label: '品牌', prop: 'blankName', type: 'txt' },
         { label: '企业名称', prop: 'companyName', type: 'slot', validate: ['v-required'] },
         { label: '信用代码', prop: 'businessLicenseCode', validate: ['v-required', 'v-number'] },
         { label: '创建人年龄', prop: 'createOperator', validate: ['v-required', 'v-numx'] },
         { label: '状态值', prop: 'status2', type: 'radio', validate: ['v-required'], translate: status(0, 1) },
         { label: '类型', prop: 'type', type: 'select', validate: ['v-required'], translate: status() },
         { label: '地址', prop: 'addr', type: 'address', valueType: 'code', validate: ['v-required']},
+        { label: '地址2', type: 'slot', prop: 'addr', setting: { detail: { prop: 'addrDetail' } }, validate: ['v-required'], valueType: 'code' },
         { label: '头像', prop: 'avatar', type: 'file', validate: ['v-required'], setting: { accept: ['jpg','png'], fileSize: 1, action: 'http://192.168.200.203:8099/index/upload'}, beforeUpload: false, onSuccess: fileSetting, onPdfPreview: pdfPreview, resetButton: true },
         { label: '基本信息', type: 'title' },
         { label: '创建时间', prop: 'dateRange', props: ['start', 'end'], type: 'dateRange', validate: ['v-required']},
         { label: '密码', prop: 'pwd', type: 'password', validate: ['v-required', 'v-compare'], dependPropIndex: 4 },
         { label: '确认密码', prop: 'rpwd',type: 'password', validate: ['v-required', 'v-comdepend'], dependPropIndex: 3 }
-        { label: '验证码', prop: 'createOperator', type: 'code', validate: ['v-required', 'v-numx'], refreshEvent: refreshCode }
+        { label: '验证码', prop: 'createOperator', type: 'code', validate: ['v-required', 'v-numx'], refreshEvent: refreshCode },
+        { label: '短信验证码', prop: 'messageCode', type: 'message', validate: ['v-required'], setting:{ interval: 30, buttonType: 'text' }, requestEvent: getCode },
+        { label: '类型', type: 'checkbox', prop: 'coopType', translate: [ { label: '超市', value: 1 }], setting: { isWholeLine: true }, validate: ['v-required'] },
       ]"
       :button-list="[
         { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
