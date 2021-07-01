@@ -21,7 +21,7 @@
         :plain="item[buttonListSetting.plain || 'plain']"
         :round="item[buttonListSetting.round || 'round']"
         :circle="item[buttonListSetting.circle || 'circle']"
-        :loading="item[buttonListSetting.loading || 'loading']"
+        :loading="item.loadingCtrl ? $attrs.loading : item[buttonListSetting.loading || 'loading']"
         :disabled="item[buttonListSetting.disabled || 'disabled']"
         :icon="item[buttonListSetting.icon || 'icon']"
         :autofocus="item[buttonListSetting.autofocus || 'autofocus']"
@@ -32,6 +32,7 @@
          current[item.clickEvent || 'clickEvent']() :
          handelClick(item, index, $event) "
       >
+      <!-- [upg][20210701] loadingCtrl - 追加加载中控制 -->
         <slot>{{ item[buttonListSetting.buttonName || 'buttonName'] }}</slot>
       </es-button>
     </template>

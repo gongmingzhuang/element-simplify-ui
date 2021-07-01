@@ -22,6 +22,7 @@
 -   <a href="#1.0.30">[1.0.30]</a>
 -   <a href="#1.0.31">[1.0.31]</a>
 -   <a href="#1.0.32">[1.0.32]</a>
+-   <a href="#1.0.33">[1.0.33]</a>
 
 #
 
@@ -725,3 +726,16 @@ var formColumns = [
   >
   </es-form>
 ```
+
+#
+
+<h1 id="1.0.33">[1.0.33][20210701] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-form>`
+
+- [upd] 修复联动校验问题。
+- [upg] 新增[formSetting.loadingCtrl] 开启提交按钮加载状态控制，通过[$props.loading]惊醒控制提交按钮是否处于加载状态；使用默认（不设置[buttonList]）按钮组时，默认开启； 加载状态中，全部表单元素处于不可编辑/操作状态；
+
+2. `<es-button-group>` 
+
+- [upg] 新增按钮控制属性[item.loadingCtrl]和父组件属性[$attrs.loading]对按钮进行加载状态控制；

@@ -30,6 +30,7 @@
         <!-- :style="{width: `calc(100% - ${formSetting.col}) / ${ formSetting.col || 1})`}" -->
         <!-- [upg][20210630]: invisibleControl - 新增可控制显示/隐藏表单操作 -->
         <!-- [upg][20210630]: isWholeLine - 新增单独控制对应字段占一整行 -->
+        <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
         <el-form-item
           v-else-if="item.invisibleControl ? item.invisibleControl(item.prop) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
@@ -50,7 +51,7 @@
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
-                :readonly="item.setting && item.setting.readonly"
+                :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               ></el-input>
             </template>
             <!-- [crt][20210621] 密码框 -->
@@ -60,7 +61,7 @@
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
-                :readonly="item.setting && item.setting.readonly"
+                :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               >
                 <i
                   class="el-icon-view"
@@ -78,7 +79,7 @@
                     v-model.trim="form[item.prop]"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
-                    :readonly="item.setting && item.setting.readonly"
+                    :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
                   />
                 </div>
                 <div class="message-right">
@@ -99,7 +100,7 @@
                     v-model.trim="form[item.prop]"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
-                    :readonly="item.setting && item.setting.readonly"
+                    :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
                   />
                 </div>
                 <div
@@ -121,7 +122,7 @@
                     :key="index+'_'+itm.value"
                     :name="item.prop"
                     :label="itm.value"
-                    :disabled="item.setting && item.setting.disabled"
+                    :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                   >{{itm.label}}</el-checkbox>
                 </template>
               </el-checkbox-group>
@@ -133,7 +134,7 @@
                   <el-radio
                     :key="index+'_'+itm.value"
                     :label="itm.value"
-                    :disabled="item.setting && item.setting.disabled"
+                    :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                   >{{itm.label}}</el-radio>
                 </template>
               </el-radio-group>
@@ -143,7 +144,7 @@
               <el-select
                 v-model="form[item.prop]"
                 :placeholder="item.placeholder || '请选择'"
-                :disabled="item.setting && item.setting.disabled"
+                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
               >
                 <el-option
                   v-for="itm in item.translate"
@@ -166,7 +167,7 @@
                   :options="regionOptions"
                   v-model="selectedRegionOptions"
                   @change="val=>handleChangeRegion(val,item)"
-                  :disabled="item.setting && item.setting.disabled"
+                  :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                 >
                 </el-cascader>
                 <el-input
@@ -186,7 +187,7 @@
                 v-model="form[item.prop]"
                 :format="item.format||'yyyy-MM-DD'"
                 :value-format="item.valueFormat||'yyyy-MM-DD HH:mm:ss'"
-                :disabled="item.setting && item.setting.disabled" 
+                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)" 
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -246,7 +247,7 @@
       <es-button-group
         v-if="!formSetting.hideButton"
         :button-list="buttonList"
-        v-bind="$attrs"
+        v-bind="{...$attrs, ...$props}"
         v-on="$listeners"
         :parent="$parent"
         :current="this"
@@ -338,13 +339,19 @@ export default {
           buttonName: '确定',
           type: 'primary',
           clickEvent: 'submit',
+          loadingCtrl: true, // [upg][20210701] 添加loading 控制
           assignCurrentParent: true
         }
       ]
+    },
+    loading: {
+      type: Boolean, 
+      default: false
     }
   },
   data() {
     return {
+      VALID_SET,
       hadInit: false, // 是否已经初始化
       canReinit: false,
       form: {}, // 表单对象
@@ -364,8 +371,9 @@ export default {
   methods: {
     // [20210629][upg] 初始化表单
     initForm() {
+      let _that = this
       // 添加校验规则
-      this.formColumns.forEach(item => {
+      this.formColumns.forEach((item, index, array) => {
         // [20210524] 日期控件
         if (item.type == 'dageRange') {
           this.$set(this.form, item.props[0], '')
@@ -410,12 +418,15 @@ export default {
               this.$set(this.rules, item.prop, [])
               item.validate.forEach(itm => {
                 var _valid = {}
-                // 默认校验
-                if (VALID_SET.hasOwnProperty(itm)) {
-                  _valid = VALID_SET[itm](item, this.formColumns, this)
+                // [upd][20210701] 联动查询修复
+                if(itm == 'v-compare' || itm == 'v-comdepend'){
+                  _valid = _that.VALID_SET[itm](item, itm, _that.formColumns, _that)
+                }else if (_that.VALID_SET.hasOwnProperty(itm)) {
+                  // 默认校验
+                  _valid = _that.VALID_SET[itm](item, _that.formColumns, _that)
                 } else if (itm instanceof Object && itm.hasOwnProperty('validator')) {
                   // [20210621][upg] 追加支持默认校验规则配置提示语
-                  _valid = VALID_SET[itm.validator](item, itm, this.formColumns, this)
+                  _valid = _that.VALID_SET[itm.validator](item, itm, _that.formColumns, _that)
                 } else {
                   // 自定义校验
                   this.validateCustomList.forEach(vitem => {

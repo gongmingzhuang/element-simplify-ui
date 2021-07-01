@@ -75,6 +75,7 @@ clickEvent|按钮点击事件<br> （1）传入类型为Function 时，调用当
 assignCurrentParent||boolean|--|false
 visible|按钮是否显示<br> （1）boolean 常用于非列表列按钮，true-显示 <br> （2）array 常用于列表列按钮，数组元素可以为boolean和object，当所有元素均为true 才显示按钮|boolean/array[boolean/object]|--|false
 invisible|按钮是否隐藏<br>（1）boolean false-显示 <br> （2）array 常用于列表列按钮，数组元素可以为boolean和object，当所有元素均为true 才隐藏按钮|boolean/array[boolean/object]|--|false
+loadingCtrl <sup>[1.0.33]</sup>|加载状态控制开关，受$attrs.loading 控制|boolean|--|false
 
 &nbsp;
 
@@ -239,7 +240,7 @@ validate-custom-list|同`<es-form>`，表单新增校验规则定义数组|array
 --|:--|:--:|:--|:--
 |ref|ref标识|string|--|--|
 label-width|表单label宽度（统一配置），不配置不显示label|string|--|--
-form-setting|表单布局配置<br> col-表示一行有多少个字段<br> itemWrap-表示label与input是否换行显示<br> itemWidth<sup>[1.0.28]</sup>(string，e.g. '100px')-标识所有**form-item** 采用固定宽度<br> hiddeButton<sup>[1.0.32]</sup> - 隐藏默认表单提交按钮，隐藏后可通过 this.$refs['es-form'].submit() 触发提交表单|object|--|{col:1, itemWrap: false}
+form-setting|表单布局配置<br> col ( Number )-表示一行有多少个字段<br> itemWrap ( Boolean )-表示label与input是否换行显示<br> itemWidth ( String )<sup>[1.0.28]</sup>(string，e.g. '100px')-标识所有**form-item** 采用固定宽度<br> hiddeButton ( Boolean )<sup>[1.0.32]</sup> - 隐藏默认表单提交按钮，隐藏后可通过 this.$refs['es-form'].submit() 触发提交表单<br> loadingCtrl ( Boolean )<sup>[1.0.33]</sup> - 与$props.loading、buttonListItem.loadingCtrl 进行加载状态控制，加载中，表单元素处于不可编辑/操作状态，只有[buttonListItem.loadingCtrl=true] 才有加载状态 |object|--|{col:1, itemWrap: false}
 `*` form-columns|表单字段配置（详见下面具体说明）|array|--|--
 `*` button-list|表单操作提交按钮配置|array|--|--
 validate-custom-list|表单新增校验规则定义数组，|array|--|--
@@ -319,9 +320,11 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
       ref="es-form"
       label-width="120px"
       @submit-event="submitDialogForm"
+      :loading="loading"
       :form-setting="{
         col: 3,
-        itemWrap: false
+        itemWrap: false,
+        loadingCtrl: true
       }"
       :form-columns="[
         { label: '基本信息', type: 'title' },
@@ -343,7 +346,7 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
         { label: '类型', type: 'checkbox', prop: 'coopType', translate: [ { label: '超市', value: 1 }], setting: { isWholeLine: true }, validate: ['v-required'] },
       ]"
       :button-list="[
-        { buttonName: '取消', type: 'primary', clickEvent: 'close', assignCurrentParent: true },
+        { buttonName: '取消', type: 'primary', clickEvent: 'close', loadingCtrl: true,  assignCurrentParent: true },
         { buttonName: '确定+', clickEvent: 'submit', assignCurrentParent: true }
       ]"
       :validate-custom-list="[
