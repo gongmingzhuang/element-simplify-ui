@@ -23,6 +23,7 @@
 -   <a href="#1.0.31">[1.0.31]</a>
 -   <a href="#1.0.32">[1.0.32]</a>
 -   <a href="#1.0.33">[1.0.33]</a>
+-   <a href="#1.0.34">[1.0.34]</a>
 
 #
 
@@ -739,3 +740,57 @@ var formColumns = [
 2. `<es-button-group>` 
 
 - [upg] 新增按钮控制属性[item.loadingCtrl]和父组件属性[$attrs.loading]对按钮进行加载状态控制；
+
+#
+
+<h1 id="1.0.34">[1.0.34][20210702] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-form>`
+
+- [20210702][upg] [validateCustomList] 新增自定义校验可设置校验规则触发时。
+- [20210701][crt] 校验规则新增支持校验手机号'v-mobile'，固话+手机号'v-telephone'。
+- [20210702][crt] 地址类型数据回显处理，回显原始数据必须为地址编号组成的字符串，且以逗号间隔，例：'100000,100001,100011'。
+- [20210702][upg] 新增自定义校验可设置校验规则触发时机，通过[validateCustomListItem.trigger] 进行配置。
+- [20210702][upg] 自定义校验规则调用时返回vue 实例，通过[validateCustomListItem.validator] 中arguments[1] 获取。
+- [20210702][upg] 对自定义校验规则增强配置{validateSetting}，通过与[validateCustomListItem] 同名进行设置；其中动态入参配置属性(dynamicParams)Function，可动态获取对应参数。
+
+```html
+  <es-form
+    ref="es-form"
+    @submit-event="submitDialogForm"
+    :form-setting="{
+      hideButton: true
+    }"
+    :form-columns="[
+      { label: '账号', prop: 'userName', validate: ['v-repeat'], validateSetting: { 'v-repeat': { dynamicParams: ()=> this.params } }}
+    ]"
+    :validate-custom-list="[
+      {
+        validName: 'v-repeat',
+        trigger: ['blur'], /* 自定义触发时机 */
+        validator: function (item, _this, _dynamicParams) {
+          return function(rule, value, callback) {
+            if (!value) {
+              callback()
+            } else {
+              let params = {}
+              // 获取动态参数
+              _dynamicParams && Object.assign(params, _dynamicParams()) 
+              params[item.prop] = value
+              // 通过vue 实例获取请求对象
+              _this.$api.api(params).then(res => {
+                let { code, data } = res.data
+                if (code === 0 && data) {
+                  callback()
+                } else {
+                  callback(new Error('字段已重复'))
+                }
+              })
+            }
+          }
+        }
+      }
+    ]"
+  >
+  </es-form>
+```

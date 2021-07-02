@@ -363,6 +363,15 @@ export default {
       messageConfig: {} // 0629 短信验证码类
     }
   },
+  // [upg][20210702] 动态监听columns 
+  watch: {
+    formColumns: {
+      handler: function(newColumns){
+        this.initForm()
+      },
+      deep: true
+    }
+  },
   created() {
     this.$emit('before-created', this.formColumns)
     this.initForm()
@@ -431,10 +440,21 @@ export default {
                   // 自定义校验
                   this.validateCustomList.forEach(vitem => {
                     if (itm == vitem.validName) {
+                    // [20210702][upg] 对自定义校验规则增强配置{validateSetting}，通过与[validateCustomListItem] 同名进行设置；其中动态入参配置属性(dynamicParams)Function，可动态获取对应参数；
+                    /**
+                     * 示例：validateCustomList: ['v-temp']，validateSetting: { 'v-temp': dynamicParams: ()=>this.dynamicParams }
+                     * - 动态校验规则通过arguments[2] 获取该参数回调方法
+                     */
+                      let _opt = null
+                      if(item.validateSetting && item.validateSetting[itm] && item.validateSetting[itm].dynamicParams){
+                        _opt = item.validateSetting[itm].dynamicParams
+                      }
                       // 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
                       // [20210531][upd] 已修复
-                      _valid.validator = vitem.validator(item)
-                      _valid.trigger = ['blur', 'change']
+                      // [20210702][upg] 新增自定义校验可设置校验规则触发时机
+                      // [20210702][upg] 自定义校验规则调用时返回vue 实例
+                      _valid.validator = vitem.validator(item, this, _opt)
+                      _valid.trigger = vitem.trigger || ['blur', 'change']
                     }
                   })
                 }
@@ -452,6 +472,10 @@ export default {
         this.formColumns.forEach(item => {
           if (item.value) {
             this.$set(this.form, item.prop, item.value)
+            // [20210702][crt] 地址类型数据回显处理
+            if(item.type == 'address'){
+              this.transferRegion(item.value, item.prop)
+            }
           }
         })
       })

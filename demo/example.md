@@ -246,6 +246,19 @@ form-setting|表单布局配置<br> col ( Number )-表示一行有多少个字�
 validate-custom-list|表单新增校验规则定义数组，|array|--|--
 
 &nbsp;
+### Validate Custom List
+
+`* 为必填项`
+
+`[*.*.*] - 于指定版本新增`
+
+|参数|说明|类型|可选值|默认值|
+--|:--|:--:|:--|:--
+|validName|自定义校验规则名，与[formColumnsItem.validate] 匹配|string|--|--|
+validator|自定义校验规则，返回值为vue 校验规则方法，item - [formColumnsItem]|function(item){return function(rule, value, callback)}|--|--
+trigger<sup>[1.0.34]</sup>|自定义校验规则触发时机，缺省时触发时机为[blur\change]|array[string]|--|--
+
+&nbsp;
 
 - 说明1：valiate-custom-list 新增表单校验规则示例：
 ```javascript
@@ -264,6 +277,32 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
         }
       }
     }
+  },
+  /* [1.0.34] 远程校验 */
+  {
+    validName: 'v-repeat',
+    trigger: ['blur'], /* [1.0.34] */
+    validator: function(item, _this/* [1.0.34] */, _dynamicParam /* [1.0.34] */){
+      return function(rule, value, callback) {
+        if (!value) {
+          callback()
+        } else {
+          let params = {}
+          // 获取动态参数
+          _dynamicParam && Object.assign(params, _dynamicParam()) 
+          params[item.prop] = value
+          // 通过vue 实例获取请求对象
+          _this.$api.api(params).then(res => {
+            let { code, data } = res.data
+            if (code === 0 && data) {
+              callback()
+            } else {
+              callback(new Error('字段已重复'))
+            }
+          })
+        }
+      }
+    }
   }
 ```
 
@@ -279,7 +318,8 @@ validate-custom-list|表单新增校验规则定义数组，|array|--|--
 label|字段名|string|--|--
 `*` prop|字段属性名|string|--|--
 type|字段类型|string|title-标题类型（无字段prop）<br> text-输入框<br> radio-单选框<br> select-下拉框<br> address-地址选择框<br> file-上传文件<br> preview-预览文件<br> dateRange-日期范围<br> password <sup>[1.0.30]</sup>-密码类型<br> code <sup>[1.0.30]</sup>-验证码类型<br> slot <sup>[1.0.31]</sup>-插槽类型（通过该类型可自定义表单元素）<br> message <sup>[1.0.32]</sup>-短信验证码类型<br> checkbox<sup>[1.0.32]</sup> - 复选框<br> txt<sup>[1.0.32]</sup> - 展示类文本类型，使用span 标签|text
-validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）<br> v-phone - 固话校验，校验规则（/^\d{3}-\d{8}$\|^\d{4}-\d{7}$/）|--
+validate|字段校验规则<br>支持出入传入对象{validator,message} 用于重置默认提示消息。<sup>[1.0.30]</sup>|array[string/（object<sup>[1.0.30]</sup>）]|v-required-必填<br> v-number-数值<br> v-email-邮箱格式<br> v-compare-主从一致（主）<br> v-comdepend-主从一致（从）<br> v-minlength <sup>[1.0.30]</sup>-限定最少需输入位数<br> v-comdepend-主从一致（从）<br> v-phone<sup>[1.0.32]</sup> - 固话校验，校验规则（/^\d{3}-\d{8}$\|^\d{4}-\d{7}$/）<br> v-mobile<sup>[1.0.34]</sup> - 手机号校验<br> v-telephone<sup>[1.0.34]</sup> - 手机号+固话校验|--
+validateSetting<sup>[1.0.34]</sup>|自定义校验规则增强配置项，支持配置项dynamicParams - 动态参数，具体使用见示例|object{object}|--|--
 translate|**[radio/select 限定]** 单选框/下拉框可选值配置|array[object]|--|--
 valueType|**[address 限定]** 地址选择框值类型|string|text-中文地址（例："北京市市辖区东城区"）<br> code-地址编码组合(例："110000,110100,110101")|text
 `*` props|**[dateRange 限定]** 日期范围选择框对应prop，必填项|array[string]|--|--
@@ -298,8 +338,8 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
 
 - 注1<sup>[1.0.32]</sup>：[type:message], setting{interval: 60, buttonType: 'primary'}，**interval** - 该属性设置每次请求短信的间隔时间（秒），默认为10s；**buttonType** - 该属性按钮类型，对应element-ui 中[button] 的**type**。
 - 注2<sup>[1.0.32]</sup>：[type:address]，setting{detail:{prop}}，配置detail 对象可使用详细地址字段；
-- 注2<sup>[1.0.32]</sup>：[formColumnsItem:setting.readonly]/[formColumnsItem:setting.disabled]，控制表单元素是否可编辑/操作，[type:input]-使用readonly，其余使用disabled;
-
+- 注3<sup>[1.0.32]</sup>：[formColumnsItem:setting.readonly]/[formColumnsItem:setting.disabled]，控制表单元素是否可编辑/操作，[type:input]-使用readonly，其余使用disabled;
+- 注4<sup>[1.0.34]</sup>：[validateSetting[validateName].dynamicParams] 该配置参数不推荐使用，替换方案可以使用function validator(item, _this) 中**_this** 获取vue 示例再获取相应动态参数；
 &nbsp;
 
 ### Form Event
@@ -344,6 +384,7 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
         { label: '验证码', prop: 'createOperator', type: 'code', validate: ['v-required', 'v-numx'], refreshEvent: refreshCode },
         { label: '短信验证码', prop: 'messageCode', type: 'message', validate: ['v-required'], setting:{ interval: 30, buttonType: 'text' }, requestEvent: getCode },
         { label: '类型', type: 'checkbox', prop: 'coopType', translate: [ { label: '超市', value: 1 }], setting: { isWholeLine: true }, validate: ['v-required'] },
+        { label: '账号', prop: 'userName', validate: ['v-repeat'], validateSetting: { 'v-repeat': { dynamicParams: ()=> this.params } }}
       ]"
       :button-list="[
         { buttonName: '取消', type: 'primary', clickEvent: 'close', loadingCtrl: true,  assignCurrentParent: true },
@@ -352,7 +393,7 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
       :validate-custom-list="[
         {
           validName: 'v-numx',
-          validator: (item, Error) =>
+          validator: (item) =>
             (rule, value, callback) =>{
               if (!value) {
                 return callback(Error(item.label + '不能为空'))
@@ -363,7 +404,32 @@ invisibleControl <sup>[1.0.32]</sup>|动态控制显示/隐藏表单元素操作
                 callback()
               }
             }
+        },
+        {
+        validName: 'v-repeat',
+        trigger: ['blur'], /* 自定义触发时机 */
+        validator: function (item, _this, _dynamicParams) {
+          return function(rule, value, callback) {
+            if (!value) {
+              callback()
+            } else {
+              let params = {}
+              // 获取动态参数
+              _dynamicParams && Object.assign(params, _dynamicParams()) 
+              params[item.prop] = value
+              // 通过vue 实例获取请求对象
+              _this.$api.api(params).then(res => {
+                let { code, data } = res.data
+                if (code === 0 && data) {
+                  callback()
+                } else {
+                  callback(new Error('字段已重复'))
+                }
+              })
+            }
+          }
         }
+      }
       ]"
     >
       <!-- [1.0.31] 新增 -->
