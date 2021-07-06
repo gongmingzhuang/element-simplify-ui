@@ -20,7 +20,8 @@
           />
         </div>
         <!-- [upg][20210524] 标题 -->
-        <template v-if="item.type=='title'">
+        <!-- [upg][20210705] 标题显示隐藏控制 -->
+        <template v-if="item.type=='title' && (!item.invisibleControl || item.invisibleControl(item, form))">
           <p
             class="form-header"
             :key="index"
@@ -31,8 +32,9 @@
         <!-- [upg][20210630]: invisibleControl - 新增可控制显示/隐藏表单操作 -->
         <!-- [upg][20210630]: isWholeLine - 新增单独控制对应字段占一整行 -->
         <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
+        <!-- [upg][20210705]: invisibleControl - 返回form 表单对象-->
         <el-form-item
-          v-else-if="item.invisibleControl ? item.invisibleControl(item.prop) : true"
+          v-else-if="item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="formSetting.itemWrap ? ' item-wrap' : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
@@ -175,7 +177,7 @@
                   type="textarea"
                   v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
                   row="3"
-                  resize="none" 
+                  resize="none"
                   :placeholder="item.setting && item.setting.detail && item.setting.detail.placeholder || '请输入详细地址'"
                 />
               </div>
@@ -187,7 +189,7 @@
                 v-model="form[item.prop]"
                 :format="item.format||'yyyy-MM-DD'"
                 :value-format="item.valueFormat||'yyyy-MM-DD HH:mm:ss'"
-                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)" 
+                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -345,7 +347,7 @@ export default {
       ]
     },
     loading: {
-      type: Boolean, 
+      type: Boolean,
       default: false
     }
   },
@@ -363,10 +365,10 @@ export default {
       messageConfig: {} // 0629 短信验证码类
     }
   },
-  // [upg][20210702] 动态监听columns 
+  // [upg][20210702] 动态监听columns
   watch: {
     formColumns: {
-      handler: function(newColumns){
+      handler: function (newColumns) {
         this.initForm()
       },
       deep: true
@@ -428,9 +430,9 @@ export default {
               item.validate.forEach(itm => {
                 var _valid = {}
                 // [upd][20210701] 联动查询修复
-                if(itm == 'v-compare' || itm == 'v-comdepend'){
+                if (itm == 'v-compare' || itm == 'v-comdepend') {
                   _valid = _that.VALID_SET[itm](item, itm, _that.formColumns, _that)
-                }else if (_that.VALID_SET.hasOwnProperty(itm)) {
+                } else if (_that.VALID_SET.hasOwnProperty(itm)) {
                   // 默认校验
                   _valid = _that.VALID_SET[itm](item, _that.formColumns, _that)
                 } else if (itm instanceof Object && itm.hasOwnProperty('validator')) {
@@ -440,13 +442,17 @@ export default {
                   // 自定义校验
                   this.validateCustomList.forEach(vitem => {
                     if (itm == vitem.validName) {
-                    // [20210702][upg] 对自定义校验规则增强配置{validateSetting}，通过与[validateCustomListItem] 同名进行设置；其中动态入参配置属性(dynamicParams)Function，可动态获取对应参数；
-                    /**
-                     * 示例：validateCustomList: ['v-temp']，validateSetting: { 'v-temp': dynamicParams: ()=>this.dynamicParams }
-                     * - 动态校验规则通过arguments[2] 获取该参数回调方法
-                     */
+                      // [20210702][upg] 对自定义校验规则增强配置{validateSetting}，通过与[validateCustomListItem] 同名进行设置；其中动态入参配置属性(dynamicParams)Function，可动态获取对应参数；
+                      /**
+                       * 示例：validateCustomList: ['v-temp']，validateSetting: { 'v-temp': dynamicParams: ()=>this.dynamicParams }
+                       * - 动态校验规则通过arguments[2] 获取该参数回调方法
+                       */
                       let _opt = null
-                      if(item.validateSetting && item.validateSetting[itm] && item.validateSetting[itm].dynamicParams){
+                      if (
+                        item.validateSetting &&
+                        item.validateSetting[itm] &&
+                        item.validateSetting[itm].dynamicParams
+                      ) {
                         _opt = item.validateSetting[itm].dynamicParams
                       }
                       // 函数中Error 对象需要在形参中传入，否则会报 $vm.Error not define 异常
@@ -473,8 +479,17 @@ export default {
           if (item.value) {
             this.$set(this.form, item.prop, item.value)
             // [20210702][crt] 地址类型数据回显处理
-            if(item.type == 'address'){
+            // [crt][20210705] 详细地址回显
+            if (item.type == 'address') {
               this.transferRegion(item.value, item.prop)
+              if (
+                item.setting &&
+                item.setting.detail &&
+                item.setting.detail.prop &&
+                item.setting.detail.value
+              ) {
+                this.$set(this.form, item.setting.detail.prop, item.setting.detail.value)
+              }
             }
           }
         })
@@ -580,10 +595,11 @@ export default {
       this.form[item.prop] = ''
     },
     // [20210629][crt] 获取短信验证码
+    // [crt][20210705] 获取表单
     getMessageCode(item) {
       this.messageConfig[item.prop].wait = true
       if (item.requestEvent) {
-        item.requestEvent(item)
+        item.requestEvent(item, this.form)
       }
 
       let timer = setInterval(() => {

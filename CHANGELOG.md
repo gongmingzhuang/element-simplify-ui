@@ -794,3 +794,13 @@ var formColumns = [
   >
   </es-form>
 ```
+
+#
+
+<h1 id="1.0.35">[1.0.35][20210706] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-form>`
+
+- [crt][20210705] 详细地址回显
+- [upg][20210705]: invisibleControl - 返回form 表单对象
+- [upg][20210705] 标题显示隐藏控制
