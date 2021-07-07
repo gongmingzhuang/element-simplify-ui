@@ -24,6 +24,7 @@
 -   <a href="#1.0.32">[1.0.32]</a>
 -   <a href="#1.0.33">[1.0.33]</a>
 -   <a href="#1.0.34">[1.0.34]</a>
+-   <a href="#1.0.36">[1.0.36]</a>
 
 #
 
@@ -797,10 +798,38 @@ var formColumns = [
 
 #
 
-<h1 id="1.0.35">[1.0.35][20210706] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+<h1 id="1.0.36">[1.0.36][20210707] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
 
 1. `<es-form>`
 
 - [crt][20210705] 详细地址回显
-- [upg][20210705]: invisibleControl - 返回form 表单对象
+- [upg][20210705] invisibleControl - 返回form 表单对象
 - [upg][20210705] 标题显示隐藏控制
+- [upg][20210706] 详细地址只读属性添加，由地址字段控制
+- [crt][20210706] singleDisabled: 单独控制不可点击
+- [upg][20210706] 隐藏域字段
+
+```html
+<script>
+var formItem = {
+  label: '选择性别',
+  type: 'checkbox',
+  prop: 'sex',
+  translate: [],
+  invisibleControl: invisibleServiceControl,
+  setting: {
+    singleDisabled: {
+      ctrl: { 'female': this.invisibleServiceControl }
+    }
+  },
+  validate: ['v-required']
+};
+// - [upg][20210705] invisibleControl - 返回form 表单对象
+function invisibleServiceControl(item, form) {
+  return (
+    form['platformNos'].length == 0 ||
+    (form['platformNos'].length > 0 && form['platformNos'].includes('1001'))
+  )
+}
+</script>
+```

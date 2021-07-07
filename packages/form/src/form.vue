@@ -33,8 +33,9 @@
         <!-- [upg][20210630]: isWholeLine - 新增单独控制对应字段占一整行 -->
         <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
         <!-- [upg][20210705]: invisibleControl - 返回form 表单对象-->
+        <!-- [upg][20210706]: 隐藏域字段-->
         <el-form-item
-          v-else-if="item.invisibleControl ? item.invisibleControl(item, form) : true"
+          v-else-if="item.type == 'hidden' ? false : item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="formSetting.itemWrap ? ' item-wrap' : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
@@ -46,6 +47,14 @@
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <span>{{form[item.prop] || '-'}}</span>
+            </template>
+            <!-- [crt][20210706] 隐藏域 -->
+            <template v-if="item.type=='hidden'">
+              <el-input
+                v-model.trim="form[item.prop]"
+                type="hidden"
+                readonly="true"
+              ></el-input>
             </template>
             <!-- 输入框 -->
             <template v-if="item.type=='text' || !item.type">
@@ -117,6 +126,7 @@
               </div>
             </template>
             <!-- [crt][20210621] 复选框 -->
+            <!-- [crt][20210706] singleDisabled: 单独控制不可点击 -->
             <template v-if="item.type=='checkbox'">
               <el-checkbox-group v-model="form[item.prop]">
                 <template v-for="(itm,idx) in item.translate">
@@ -124,7 +134,15 @@
                     :key="index+'_'+itm.value"
                     :name="item.prop"
                     :label="itm.value"
-                    :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                    :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)
+                    || ( 
+                      item.setting.singleDisabled 
+                      && item.setting.singleDisabled.ctrl 
+                      && (
+                        (typeof(item.setting.singleDisabled.ctrl[itm.value]) == 'boolean' && item.setting.singleDisabled.ctrl[itm.value]) 
+                        ||  typeof(item.setting.singleDisabled.ctrl[itm.value]) == 'function' && !item.setting.singleDisabled.ctrl[itm.value](item, form)
+                      )
+                    )"
                   >{{itm.label}}</el-checkbox>
                 </template>
               </el-checkbox-group>
@@ -158,6 +176,7 @@
               </el-select>
             </template>
             <!-- 省市区选择 -->
+            <!-- [upg][20210706]: 详细地址只读属性添加-->
             <template v-if="item.type=='address'">
               <el-input
                 v-model="form[item.prop]"
@@ -172,8 +191,10 @@
                   :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                 >
                 </el-cascader>
+
                 <el-input
                   v-if="item.setting && item.setting.detail"
+                  :readonly="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                   type="textarea"
                   v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
                   row="3"
