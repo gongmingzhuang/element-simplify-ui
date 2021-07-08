@@ -1,4 +1,4 @@
-<template>
+el<template>
   <div class="es-form">
     <el-form
       ref="form"
@@ -27,15 +27,22 @@
             :key="index"
           >{{item.label}}</p>
         </template>
+        <!-- [upg][20210706]: 隐藏域字段-->
+        <el-form-item v-else-if="item.type=='hidden'">
+          <el-input
+            v-model.trim="form[item.prop]"
+            type="hidden"
+            readonly="true"
+          />
+        </el-form-item>
         <!-- [upg][20210524] 支持分列表单 -->
         <!-- :style="{width: `calc(100% - ${formSetting.col}) / ${ formSetting.col || 1})`}" -->
         <!-- [upg][20210630]: invisibleControl - 新增可控制显示/隐藏表单操作 -->
         <!-- [upg][20210630]: isWholeLine - 新增单独控制对应字段占一整行 -->
         <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
         <!-- [upg][20210705]: invisibleControl - 返回form 表单对象-->
-        <!-- [upg][20210706]: 隐藏域字段-->
         <el-form-item
-          v-else-if="item.type == 'hidden' ? false : item.invisibleControl ? item.invisibleControl(item, form) : true"
+          v-else-if="0 ? false : item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="formSetting.itemWrap ? ' item-wrap' : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
@@ -140,7 +147,7 @@
                       && item.setting.singleDisabled.ctrl 
                       && (
                         (typeof(item.setting.singleDisabled.ctrl[itm.value]) == 'boolean' && item.setting.singleDisabled.ctrl[itm.value]) 
-                        ||  typeof(item.setting.singleDisabled.ctrl[itm.value]) == 'function' && !item.setting.singleDisabled.ctrl[itm.value](item, form)
+                        ||  typeof(item.setting.singleDisabled.ctrl[itm.value]) == 'function' && item.setting.singleDisabled.ctrl[itm.value](item, form)
                       )
                     )"
                   >{{itm.label}}</el-checkbox>
@@ -492,13 +499,18 @@ export default {
         }
       })
       // [20210629][crt] 移除校验规则/清空表单
+      // [crt][20210707] value = 0 赋值
       this.$nextTick(() => {
         this.$refs.form.clearValidate()
         this.$refs.form.resetFields()
         // 设置默认值
         this.formColumns.forEach(item => {
-          if (item.value) {
-            this.$set(this.form, item.prop, item.value)
+          if (item.value || item.value === 0) {
+            if (item.value === 0) {
+              this.$set(this.form, item.prop, item.value + '')
+            } else {
+              this.$set(this.form, item.prop, item.value)
+            }
             // [20210702][crt] 地址类型数据回显处理
             // [crt][20210705] 详细地址回显
             if (item.type == 'address') {
