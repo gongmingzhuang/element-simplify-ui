@@ -4,16 +4,17 @@
       <!-- [20210519][upg] 显示/隐藏增强 针对列表中操作栏根据scope 进行控制显示 -->
       <!-- [20210519][upg] 追加不可见控制 -->
       <!-- [20210519][remark] 当同时设置visible 与invisible 时，invisible 失效 -->
+      <!-- [20210712][upd] 可见修改 typeof(item.visible) == 'function' -->
       <es-button
-        v-if="(typeof(scope) == 'object' && typeof(item[buttonListSetting.visible || 'visible']) == 'object') ? 
-        checkVisible(scope, item[buttonListSetting.visible || 'visible']) : 
+        v-if="(typeof(item[buttonListSetting.visible || 'visible']) == 'object') ? 
+        checkVisible(item[buttonListSetting.visible || 'visible']) : 
         typeof(item[buttonListSetting.visible || 'visible']) == 'boolean' ? 
         item[buttonListSetting.visible || 'visible'] : 
-
-        (typeof(scope) == 'object' && typeof(item[buttonListSetting.invisible || 'invisible']) == 'object') ?
-        checkInvisible(scope, item[buttonListSetting.invisible || 'invisible']) : 
+        (typeof(item[buttonListSetting.invisible || 'invisible']) == 'object') ?
+        checkInvisible(item[buttonListSetting.invisible || 'invisible']) : 
         typeof(item[buttonListSetting.invisible || 'invisible']) == 'boolean' ? 
         item[buttonListSetting.invisible || 'invisible'] : 
+        typeof(item.visible) == 'function' ? item.visible() : 
         'true'"
         :key="index"
         :size="item[buttonListSetting.size || 'size']"
@@ -155,6 +156,7 @@ export default {
     },
     // [20210519][crt] 判断行按钮是否可见
     checkVisible(scope, visible) {
+      debugger
       let _visible = true
       visible.forEach((item) => {
         if (!item) {

@@ -1,4 +1,4 @@
-el<template>
+<template>
   <div class="es-form">
     <el-form
       ref="form"
@@ -28,11 +28,14 @@ el<template>
           >{{item.label}}</p>
         </template>
         <!-- [upg][20210706]: 隐藏域字段-->
-        <el-form-item v-else-if="item.type=='hidden'">
+        <el-form-item
+          v-else-if="item.type=='hidden'"
+          class="hidden"
+        >
           <el-input
             v-model.trim="form[item.prop]"
             type="hidden"
-            readonly="true"
+            :readonly="true"
           />
         </el-form-item>
         <!-- [upg][20210524] 支持分列表单 -->
@@ -42,7 +45,7 @@ el<template>
         <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
         <!-- [upg][20210705]: invisibleControl - 返回form 表单对象-->
         <el-form-item
-          v-else-if="0 ? false : item.invisibleControl ? item.invisibleControl(item, form) : true"
+          v-else-if="item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="formSetting.itemWrap ? ' item-wrap' : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
@@ -53,14 +56,21 @@ el<template>
           <div class="es-form-item">
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
-              <span>{{form[item.prop] || '-'}}</span>
+              <!-- [crt][20210709] 金额格式化 -->
+              <template v-if="item.setting && item.setting.dataType=='money'">
+                <span>{{(form[item.prop] && UTIL.moneyFormat(form[item.prop])) || (UTIL.moneyFormat(0)) }}</span>
+              </template>
+              <template v-else>
+                <span>{{form[item.prop] || '-'}}</span>
+              </template>
             </template>
+
             <!-- [crt][20210706] 隐藏域 -->
             <template v-if="item.type=='hidden'">
               <el-input
                 v-model.trim="form[item.prop]"
                 type="hidden"
-                readonly="true"
+                :readonly="true"
               ></el-input>
             </template>
             <!-- 输入框 -->
@@ -299,6 +309,7 @@ import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
 import EsUpload from '../../upload/src/upload'
 import VALID_SET from '../../../lib/validate'
+import UTIL from '../../../util/util.js'
 // 省市区联动数据
 import {
   provinceAndCityData,
@@ -382,6 +393,7 @@ export default {
   data() {
     return {
       VALID_SET,
+      UTIL,
       hadInit: false, // 是否已经初始化
       canReinit: false,
       form: {}, // 表单对象
@@ -629,20 +641,42 @@ export default {
     },
     // [20210629][crt] 获取短信验证码
     // [crt][20210705] 获取表单
-    getMessageCode(item) {
-      this.messageConfig[item.prop].wait = true
+    getMessageCode(item, callback) {
+      // 1.初始化计时器
+      // 2.判断是否符合触发请求
+      // 3.触发请求
+      // 4.计时器触发
+      // this.messageConfig[item.prop].timer =  (item.setting && item.setting.interval) || 10
+      // this.messageConfig[item.prop].wait = 'first'
+      let _that = this
       if (item.requestEvent) {
-        item.requestEvent(item, this.form)
+        item.requestEvent(item, this.form).then(
+          res => {
+            this.messageConfig[item.prop].wait = true
+            let timer = setInterval(() => {
+              _that.messageConfig[item.prop].timer--
+              if (!_that.messageConfig[item.prop].timer) {
+                _that.messageConfig[item.prop].timer = (item.setting && item.setting.interval) || 10
+                _that.messageConfig[item.prop].wait = false
+                clearInterval(timer)
+              }
+            }, 1000)
+          },
+          rej => {
+            // debugger
+          }
+        )
+        // callback(function () {
+        //   let timer = setInterval(() => {
+        //     _that.messageConfig[item.prop].timer--
+        //     if (!_that.messageConfig[item.prop].timer) {
+        //       _that.messageConfig[item.prop].timer = (item.setting && item.setting.interval) || 10
+        //       _that.messageConfig[item.prop].wait = false
+        //       clearInterval(timer)
+        //     }
+        //   }, 1000)
+        // })
       }
-
-      let timer = setInterval(() => {
-        this.messageConfig[item.prop].timer--
-        if (!this.messageConfig[item.prop].timer) {
-          this.messageConfig[item.prop].timer = (item.setting && item.setting.interval) || 10
-          this.messageConfig[item.prop].wait = false
-          clearInterval(timer)
-        }
-      }, 1000)
     }
   }
 }
@@ -703,6 +737,9 @@ export default {
 
 .es-form .es-form-item {
   display: flex;
+}
+.es-form .el-form-item.hidden {
+  display: none;
 }
 .es-form .es-form-item .suffix-slot {
   margin-left: 8px;
