@@ -2,6 +2,7 @@
 import EsAside from "../packages/aside/index"
 import EsButton from "../packages/button/index"
 import EsButtonGroup from "../packages/button-group/index"
+import EsCropper from "../packages/cropper/index"
 import EsCrumb from "../packages/crumb/index"
 import EsDialog from "../packages/dialog/index"
 import EsDialogForm from "../packages/dialog-form/index"
@@ -20,6 +21,7 @@ const components = [
   EsAside,
   EsButton,
   EsButtonGroup,
+  EsCropper,
   EsCrumb,
   EsDialog,
   EsDialogForm,

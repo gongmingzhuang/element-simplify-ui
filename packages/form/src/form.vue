@@ -44,21 +44,33 @@
         <!-- [upg][20210630]: isWholeLine - 新增单独控制对应字段占一整行 -->
         <!-- [upg][20210701]: loadingCtrl - 提交loading控制 -->
         <!-- [upg][20210705]: invisibleControl - 返回form 表单对象-->
+        <!-- [upg][20210713] type=txt 新增render 渲染 -->
+        <!-- [upg][20210713] 样式class 添加 -->
+        <!-- [upg][20210713] 输入框支持清空 -->
+        <!-- [upg][20210714] 禁用formSetting.itemWrap -->
+        <!-- [upg][20210714] 新增item.setting.styleClass 添加类名 -->
+        <!-- [upg][20210714] 新增 crediteCode，配置默认校验规则（不支持修改） -->
         <el-form-item
           v-else-if="item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
-          :class="formSetting.itemWrap ? ' item-wrap' : ''"
+          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
           :label-width="labelWidth || item.labelWidth"
           :key="index"
           :prop="item.prop"
         >
           <div class="es-form-item">
+            
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <!-- [crt][20210709] 金额格式化 -->
               <template v-if="item.setting && item.setting.dataType=='money'">
                 <span>{{(form[item.prop] && UTIL.moneyFormat(form[item.prop])) || (UTIL.moneyFormat(0)) }}</span>
+              </template>
+              <template v-else-if="item.render">
+                <div
+                  v-html='item.render()'
+                ></div>
               </template>
               <template v-else>
                 <span>{{form[item.prop] || '-'}}</span>
@@ -74,11 +86,13 @@
               ></el-input>
             </template>
             <!-- 输入框 -->
-            <template v-if="item.type=='text' || !item.type">
+            <!-- [crt][20210714] 统一社会信用代码类型 -->
+            <template v-if="item.type=='text' || !item.type || item.type == 'creditCode'">
               <el-input
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
+                :clearable="item.setting && item.setting.clearable"
                 :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               ></el-input>
             </template>
@@ -89,6 +103,7 @@
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
+                :clearable="item.setting && item.setting.clearable"
                 :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               >
                 <i
@@ -463,7 +478,7 @@ export default {
           if (item.type == 'address' && item.setting && item.setting.detail) {
             this.$set(this.form, item.setting.detail.prop, '')
           }
-
+          // 
           if (item.validate) {
             if (!this.rules.hasOwnProperty(item.prop)) {
               this.$set(this.rules, item.prop, [])

@@ -25,6 +25,7 @@
 -   <a href="#1.0.33">[1.0.33]</a>
 -   <a href="#1.0.34">[1.0.34]</a>
 -   <a href="#1.0.36">[1.0.36]</a>
+-   <a href="#1.0.39">[1.0.39]</a>
 
 #
 
@@ -833,3 +834,9 @@ function invisibleServiceControl(item, form) {
 }
 </script>
 ```
+
+#
+
+<h1 id="1.0.39">[1.0.39][20210713] <span style="font-size: 14px">[ <a href="#home">返回头部</a> ]</span></h1>
+
+1. `<es-cropper>` - 图片截图保存控件
