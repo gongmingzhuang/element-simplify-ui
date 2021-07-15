@@ -50,6 +50,7 @@
         <!-- [upg][20210714] 禁用formSetting.itemWrap -->
         <!-- [upg][20210714] 新增item.setting.styleClass 添加类名 -->
         <!-- [upg][20210714] 新增 crediteCode/name/phone，配置默认校验规则 -->
+        <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <el-form-item
           v-else-if="item.type != 'image-group' && item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
@@ -60,7 +61,6 @@
           :prop="item.prop"
         >
           <div class="es-form-item">
-
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <!-- [crt][20210709] 金额格式化 -->
@@ -74,7 +74,15 @@
                 <span>{{form[item.prop] || '-'}}</span>
               </template>
             </template>
-
+            <!-- [crt][20210715] 远程查询模糊输入 -->
+            <template v-if="item.type=='remote'">
+              <el-autocomplete
+                v-model="form[item.prop]"
+                :fetch-suggestions="item.fetchEvent"
+                :placeholder="'请输入'+item.label"
+                @select="item.selectEvent"
+              ></el-autocomplete>
+            </template>
             <!-- [crt][20210706] 隐藏域 -->
             <template v-if="item.type=='hidden'">
               <el-input
@@ -86,8 +94,10 @@
             <!-- 输入框 -->
             <!-- [crt][20210714] 统一社会信用代码类型 -->
             <!-- [crt][20210714] 名称类型 -->
+            <!-- [crt][20210715] 前置icon -->
             <template v-if="item.type=='text' || !item.type || item.type == 'creditCode' || item.type == 'name' || item.type == 'mobile' || item.type == 'IDCard' || item.type == 'email'">
               <el-input
+                :prefix-icon="item.setting && item.setting.prefixIcon"
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
@@ -98,6 +108,7 @@
             <!-- [crt][20210621] 密码框 -->
             <template v-if="item.type=='password'">
               <el-input
+                :prefix-icon="item.setting && item.setting.prefixIcon"
                 :type="passwordConfig[item.prop].show ? 'text': 'password'"
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
@@ -118,6 +129,7 @@
               <div class="message">
                 <div class="message-left">
                   <el-input
+                    :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
@@ -139,6 +151,7 @@
               <div class="code">
                 <div class="code-left">
                   <el-input
+                    :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
@@ -486,12 +499,12 @@ export default {
   },
   // [upg][20210702] 动态监听columns
   watch: {
-    // formColumns: {
-    //   handler: function (newColumns) {
-    //     this.initForm()
-    //   },
-    //   deep: true
-    // }
+    formColumns: {
+      handler: function (newColumns) {
+        this.initForm()
+      },
+      deep: true
+    }
   },
   created() {
     this.$emit('before-created', this.formColumns)
@@ -915,7 +928,7 @@ export default {
   .d-flex {
     display: flex;
   }
-  .flex-wrap{
+  .flex-wrap {
     flex-wrap: wrap;
   }
   .w-100 {
@@ -966,7 +979,8 @@ export default {
 .es-form .el-date-editor--daterange.el-input,
 .es-form .el-date-editor--daterange.el-input__inner,
 .es-form .el-date-editor--timerange.el-input,
-.es-form .el-date-editor--timerange.el-input__inner {
+.es-form .el-date-editor--timerange.el-input__inner,
+.es-form .el-autocomplete {
   width: 100%;
 }
 
@@ -981,16 +995,23 @@ export default {
 }
 
 .es-form .code {
+  position: relative;
   display: flex;
   width: 100%;
 }
 .es-form .code .code-left {
-  width: calc(100% - 120px);
+  // width: calc(100% - 120px);
+  width: 100%;
 }
 .es-form .code .code-right {
-  width: 120px;
-  height: 40px;
-  /* margin-left: 2%; */
+  position: absolute;
+  right: 3px;
+  top: 4px;
+  height: 34px;
+  width: 110px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .es-form .code img {
   float: right;
