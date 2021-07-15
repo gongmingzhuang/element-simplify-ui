@@ -49,9 +49,9 @@
         <!-- [upg][20210713] 输入框支持清空 -->
         <!-- [upg][20210714] 禁用formSetting.itemWrap -->
         <!-- [upg][20210714] 新增item.setting.styleClass 添加类名 -->
-        <!-- [upg][20210714] 新增 crediteCode，配置默认校验规则（不支持修改） -->
+        <!-- [upg][20210714] 新增 crediteCode/name/phone，配置默认校验规则 -->
         <el-form-item
-          v-else-if="item.invisibleControl ? item.invisibleControl(item, form) : true"
+          v-else-if="item.type != 'image-group' && item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && item.label)"
@@ -60,7 +60,7 @@
           :prop="item.prop"
         >
           <div class="es-form-item">
-            
+
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <!-- [crt][20210709] 金额格式化 -->
@@ -68,9 +68,7 @@
                 <span>{{(form[item.prop] && UTIL.moneyFormat(form[item.prop])) || (UTIL.moneyFormat(0)) }}</span>
               </template>
               <template v-else-if="item.render">
-                <div
-                  v-html='item.render()'
-                ></div>
+                <div v-html='item.render()'></div>
               </template>
               <template v-else>
                 <span>{{form[item.prop] || '-'}}</span>
@@ -87,7 +85,8 @@
             </template>
             <!-- 输入框 -->
             <!-- [crt][20210714] 统一社会信用代码类型 -->
-            <template v-if="item.type=='text' || !item.type || item.type == 'creditCode'">
+            <!-- [crt][20210714] 名称类型 -->
+            <template v-if="item.type=='text' || !item.type || item.type == 'creditCode' || item.type == 'name' || item.type == 'mobile' || item.type == 'IDCard' || item.type == 'email'">
               <el-input
                 v-model.trim="form[item.prop]"
                 :placeholder="item.placeholder || '请输入' + item.label"
@@ -197,6 +196,7 @@
                 v-model="form[item.prop]"
                 :placeholder="item.placeholder || '请选择'"
                 :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                @change="(val) => item.changeEvent(val, item, form)"
               >
                 <el-option
                   v-for="itm in item.translate"
@@ -209,6 +209,7 @@
             </template>
             <!-- 省市区选择 -->
             <!-- [upg][20210706]: 详细地址只读属性添加-->
+            <!-- [upg][20210714]: 支持只选省市 onlyProvinceAndCity -->
             <template v-if="item.type=='address'">
               <el-input
                 v-model="form[item.prop]"
@@ -217,13 +218,12 @@
               <div class="address">
                 <el-cascader
                   size="large"
-                  :options="regionOptions"
-                  v-model="selectedRegionOptions"
+                  :options="item.setting && item.setting.onlyProvinceAndCity ? provinceAndCityOptions : regionOptions"
+                  v-model="regionConfig[item.prop]"
                   @change="val=>handleChangeRegion(val,item)"
                   :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                 >
                 </el-cascader>
-
                 <el-input
                   v-if="item.setting && item.setting.detail"
                   :readonly="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
@@ -236,18 +236,46 @@
               </div>
             </template>
             <!-- 日期选择框 -->
+            <!-- [20210714][upd] 移除组件格式化功能 -->
             <template v-if="item.type=='dateRange'">
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
-                :format="item.format||'yyyy-MM-DD'"
-                :value-format="item.valueFormat||'yyyy-MM-DD HH:mm:ss'"
                 :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
               />
+            </template>
+            <!-- [20210714] 日期切换框 -->
+            <template v-if="item.type === 'dateRangeSwitch'">
+              <div class="p-rel d-flex w-100">
+                <el-date-picker
+                  v-show="item.setting && !item.setting.switch"
+                  @change="date => {dateFormatting(date, item)}"
+                  v-model="form[item.prop]"
+                  :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                ></el-date-picker>
+                <el-date-picker
+                  v-show="item.setting && item.setting.switch"
+                  @change="date => {dateFormatting(date, item)}"
+                  v-model="form[item.props[0]]"
+                  :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                  type="date"
+                  placeholder="选择日期"
+                ></el-date-picker>
+                <el-checkbox
+                  class="ml-10"
+                  v-model="item.setting.switch"
+                  @change="val => {switchDateType(val, item)}"
+                >长期</el-checkbox>
+                <!-- @change="val => { item.setting.switch = !val }" -->
+              </div>
             </template>
             <!-- 文件上传框 -->
             <template v-if="item.type=='file' || item.type=='preview'">
@@ -288,6 +316,40 @@
             </div>
           </div>
         </el-form-item>
+        <!-- [upg][20210714] 新增图片组 -->
+        <template v-if="item.type == 'image-group' && (!item.invisibleControl || item.invisibleControl(item, form))">
+          <div
+            class="image-group d-flex flex-wrap w-100"
+            :class="item.prop"
+          >
+            <template v-for="(imgItem, imgIndex) in item.group">
+              <el-form-item
+                v-if="(!imgItem.invisibleControl || imgItem.invisibleControl(imgItem, form))"
+                class="d-flex"
+                :label="imgItem.label"
+                :key="imgIndex"
+                :prop="imgItem.prop"
+              >
+                <el-input
+                  v-model="form[imgItem.prop]"
+                  v-show="0"
+                />
+                <es-upload
+                  :headers="item.setting.headers"
+                  :action="item.setting.action || '#'"
+                  :list-type="'picture-card'"
+                  :file-path="form[imgItem.prop]"
+                  :setting="item.setting"
+                  :reset-button="item.setting.resetButton"
+                  :pdf-preview="item.setting.onPdfPreview"
+                  :before-upload="item.setting.beforeUpload"
+                  @on-success="res => handleOnSuccess(res,imgItem, item.setting)"
+                  @on-reset="res=>handleOnReset(res,imgItem, item.setting)"
+                />
+              </el-form-item>
+            </template>
+          </div>
+        </template>
       </template>
     </el-form>
     <!-- [20210622] 表单元素追加插槽，支持两种方式 -->
@@ -413,21 +475,23 @@ export default {
       canReinit: false,
       form: {}, // 表单对象
       regionOptions: regionData, // 1102 省市区 全部数据
+      provinceAndCityOptions: provinceAndCityData, // 0714 省市 全部数据
       selectedRegionOptions: [], // 1102 省市区 选择数据
       selectedRegionData: {}, // 1102 省市区 选择数据
       passwordConfig: {}, // 0621 密码类型显示/隐藏控制
       codeConfig: {}, // 0621 验证码类图片
-      messageConfig: {} // 0629 短信验证码类
+      messageConfig: {}, // 0629 短信验证码类
+      regionConfig: {} // 0714 地址类
     }
   },
   // [upg][20210702] 动态监听columns
   watch: {
-    formColumns: {
-      handler: function (newColumns) {
-        this.initForm()
-      },
-      deep: true
-    }
+    // formColumns: {
+    //   handler: function (newColumns) {
+    //     this.initForm()
+    //   },
+    //   deep: true
+    // }
   },
   created() {
     this.$emit('before-created', this.formColumns)
@@ -441,7 +505,9 @@ export default {
       // 添加校验规则
       this.formColumns.forEach((item, index, array) => {
         // [20210524] 日期控件
-        if (item.type == 'dageRange') {
+        // [20210714] 新增日期切换控件
+        if (item.type == 'dateRange' || item.type == 'dateRangeSwitch') {
+          this.$set(this.form, item.prop, '')
           this.$set(this.form, item.props[0], '')
           this.$set(this.form, item.props[1], '')
         }
@@ -478,12 +544,135 @@ export default {
           if (item.type == 'address' && item.setting && item.setting.detail) {
             this.$set(this.form, item.setting.detail.prop, '')
           }
-          // 
+          if (item.type == 'address') {
+            this.$set(this.regionConfig, item.prop, [])
+          }
+          // [20210714] type: creditCode 内置类型统一社会信用代码配置默认参数
+          if (item.type == 'creditCode') {
+            item.maxlength = item.maxlength || 18
+            if (!item.validate) {
+              item.validate = ['v-required', 'v-credit-code']
+            }
+            if (item.validate && item.validate instanceof Array) {
+              if (item.validate.length == 0) {
+                item.validate.push('v-required')
+                item.validate.push('v-credit-code')
+              } else if (
+                !item.validate.includes('v-credit-code') &&
+                !item.validate.includes('v-required')
+              ) {
+                item.validate.unshift('v-credit-code')
+                item.validate.unshift('v-required')
+              } else if (!item.validate.includes('v-required')) {
+                item.validate.unshift('v-required')
+              }
+            }
+          }
+          // [20210714] type: creditCode 内置类型名称配置默认参数
+          if (item.type == 'name') {
+            if (!item.validate) {
+              item.validate = ['v-required', 'v-name']
+            }
+            if (item.validate && item.validate instanceof Array) {
+              if (item.validate.length == 0) {
+                item.validate.push('v-required')
+                item.validate.push('v-name')
+              } else if (
+                !item.validate.includes('v-name') &&
+                !item.validate.includes('v-required')
+              ) {
+                item.validate.unshift('v-name')
+                item.validate.unshift('v-required')
+              } else if (!item.validate.includes('v-required')) {
+                item.validate.unshift('v-required')
+              }
+            }
+          }
+          // [20210714] type: mobile 内置类型手机号配置默认参数
+          if (item.type == 'mobile') {
+            item.maxlength = 11
+            if (!item.validate) {
+              item.validate = ['v-required', 'v-mobile']
+            }
+            if (item.validate && item.validate instanceof Array) {
+              if (item.validate.length == 0) {
+                item.validate.push('v-required')
+                item.validate.push('v-mobile')
+              } else if (
+                !item.validate.includes('v-mobile') &&
+                !item.validate.includes('v-required')
+              ) {
+                item.validate.unshift('v-mobile')
+                item.validate.unshift('v-required')
+              } else if (!item.validate.includes('v-required')) {
+                item.validate.unshift('v-required')
+              }
+            }
+          }
+
+          // [20210714] type: IDCard 身份证号
+          if (item.type == 'IDCard') {
+            item.maxlength = 18
+            if (!item.validate) {
+              item.validate = ['v-required', 'v-id-card']
+            }
+            if (item.validate && item.validate instanceof Array) {
+              if (item.validate.length == 0) {
+                item.validate.push('v-required')
+                item.validate.push('v-id-card')
+              } else if (
+                !item.validate.includes('v-id-card') &&
+                !item.validate.includes('v-required')
+              ) {
+                item.validate.unshift('v-id-card')
+                item.validate.unshift('v-required')
+              } else if (!item.validate.includes('v-required')) {
+                item.validate.unshift('v-required')
+              }
+            }
+          }
+
+          // [20210714] type: email 邮箱
+          if (item.type == 'email') {
+            if (!item.validate) {
+              item.validate = ['v-email']
+            }
+            if (item.validate && item.validate instanceof Array) {
+              if (item.validate.length == 0) {
+                item.validate.push('v-email')
+              }
+              if (!item.validate.includes('v-email')) {
+                item.validate.unshift('v-email')
+              }
+              if (item.validate.includes('v-required')) {
+                let _index = item.validate.lastIndexOf('v-required')
+                item.validate.splice(_index, 1)
+                item.validate.unshift('v-required')
+              }
+            }
+          }
+
+          // [20210714][crt] type：image-group 按钮组
+          if (item.type == 'image-group') {
+            item.group.forEach(imgItem => {
+              this.$set(this.form, imgItem.prop, '')
+              this.$set(this.rules, imgItem.prop, [])
+              if (imgItem.validate) {
+                let _imgValid = _that.VALID_SET[imgItem.validate[0]](
+                  imgItem,
+                  _that.formColumns,
+                  _that
+                )
+                this.rules[imgItem.prop].push(_imgValid)
+              }
+            })
+          }
+
           if (item.validate) {
             if (!this.rules.hasOwnProperty(item.prop)) {
               this.$set(this.rules, item.prop, [])
               item.validate.forEach(itm => {
-                var _valid = {}
+                let _valid = {}
                 // [upd][20210701] 联动查询修复
                 if (itm == 'v-compare' || itm == 'v-comdepend') {
                   _valid = _that.VALID_SET[itm](item, itm, _that.formColumns, _that)
@@ -541,7 +730,7 @@ export default {
             // [20210702][crt] 地址类型数据回显处理
             // [crt][20210705] 详细地址回显
             if (item.type == 'address') {
-              this.transferRegion(item.value, item.prop)
+              this.transferRegion(item.value, item)
               if (
                 item.setting &&
                 item.setting.detail &&
@@ -556,6 +745,7 @@ export default {
       })
     },
     // [20210518][crt] 日期格式化
+    // [20210714][upd] dateRangeSwitch 增强
     dateFormatting(date, item) {
       let _valueFormat = item.valueFormat || 'yyyy-MM-DD HH:mm:ss'
       if (!date) {
@@ -564,8 +754,27 @@ export default {
         this.form[item.props[1]] = ''
         return
       }
-      this.form[item.props[0]] = this.$moment(date[0]).format(_valueFormat)
-      this.form[item.props[1]] = this.$moment(date[1]).format(_valueFormat)
+      // dateRange / dateRangeSwitch[switch: FALSE]
+      if (
+        !item.setting.hasOwnProperty('switch') ||
+        (item.setting.hasOwnProperty('switch') && !item.setting.switch)
+      ) {
+        this.form[item.props[0]] = this.$moment(date[0]).format(_valueFormat)
+        this.form[item.props[1]] =
+          this.$moment(date[1]).format(_valueFormat).split(' ')[0] + ' 23:59:59'
+      }
+      // [20210714] dateRangeSwitch 增强
+      // dateRangeSwitch[switch: TRUE]
+      if (item.setting.hasOwnProperty('switch') && item.setting.switch) {
+        this.$set(this.form, item.prop, this.$moment(date).format(_valueFormat))
+      }
+    },
+    // [20210714][crt] 切换日期类型
+    switchDateType(val, item) {
+      item.setting.switch = val
+      this.form[item.prop] = ''
+      this.form[item.props[0]] = ''
+      this.form[item.props[1]] = ''
     },
     // [20210518] 表单提交
     submit() {
@@ -632,23 +841,22 @@ export default {
     },
     // [20210525] 地址控件转换
     // 用法：this.$refs['es-form'].transferRegion('140000,140300,140303', 'addr')
-    transferRegion(addrStr, prop) {
-      this.form[prop] = addrStr
+    transferRegion(addrStr, item) {
+      this.form[item.prop] = addrStr
       let [provinceId, cityId, districtId] = addrStr.split(',')
-      if (!provinceId) {
-        this.selectedRegionOptions = [cityId, districtId]
+      if (!districtId) {
+        this.regionConfig[item.prop] = [provinceId, cityId]
       } else {
-        this.selectedRegionOptions = [provinceId, cityId, districtId]
+        this.regionConfig[item.prop] = [provinceId, cityId, districtId]
       }
-      let regionLen = 45
-      this.selectedRegionOptions.forEach(item => {
-        regionLen += CodeToText[item].length * 15
-      })
+      // let regionLen = 45
+      // this.regionConfig[prop].forEach(item => {
+      //   regionLen += CodeToText[item].length * 15
+      // })
     },
     // [20210525][crt] 文件上传成功
-    handleOnSuccess(res, item) {
-      typeof item.onSuccess == 'function' &&
-        item.onSuccess({ form: this.form, prop: item.prop, result: res })
+    handleOnSuccess(res, item, setting) {
+      setting.onSuccess(res, item, this.form)
     },
     // [20210527][crt] 重置字段
     handleOnReset(res, item) {
@@ -696,14 +904,26 @@ export default {
   }
 }
 </script>
-<style>
-.w-100 {
-  width: 100%;
-}
+<style lang="less">
 .es-form {
   padding: 10px;
   background: #fff;
   border-radius: 5px;
+  .p-rel {
+    position: relative;
+  }
+  .d-flex {
+    display: flex;
+  }
+  .flex-wrap{
+    flex-wrap: wrap;
+  }
+  .w-100 {
+    width: 100%;
+  }
+  .ml-10 {
+    margin-left: 10px;
+  }
 }
 .es-form .el-form {
   display: flex;
@@ -810,5 +1030,28 @@ export default {
 .es-form .address .el-textarea {
   margin-top: 5px;
   font-size: 12px;
+}
+
+.es-form {
+  // 日期控件布局样式
+  .el-date-editor {
+    display: flex;
+    justify-content: space-around;
+  }
+  .el-date-editor.el-input,
+  .el-date-editor--daterange.el-input,
+  .el-date-editor--daterange.el-input__inner,
+  .el-date-editor--timerange.el-input,
+  .el-date-editor--timerange.el-input__inner {
+    width: 100% !important;
+  }
+  // 图片组控件
+  .image-group {
+    .el-form-item {
+      flex-direction: column;
+      align-items: center;
+      margin: 0 20px 22px;
+    }
+  }
 }
 </style>
