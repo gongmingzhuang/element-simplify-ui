@@ -1,66 +1,60 @@
 <template>
   <div class="es-upload">
     <div class="upload">
-      <!-- [20210526][upd] 显示控件情景：未选择、可修改 -->
-      <!-- [20210714][upd] 添加请求头 -->
-      <el-upload
-        class="upload-comp"
-        v-if="type=='file'"
-        :list-type="listType"
+      <upload
+        ref="picture-card"
+        list-type="picture-card"
         :action="action"
         :headers="headers"
-        :before-upload="typeof(beforeUpload)=='function' ? beforeUpload: handleBeforeUpload"
-        :on-success="handleOnSuccess"
-        :on-error="handleOnError"
-        :show-file-list="false"
+        :before-upload="file => beforeUpload(file, $attrs.item, $attrs.form)"
+        :on-success="(response, file, fileList) => onSuccess(response, $attrs.item, $attrs.form)"
+        :on-error="onError"
+        limit="1"
       >
-       <i slot="default" class="el-icon-plus" v-if="listType=='picture-card'"></i>
-        <el-button
-          v-else
-          class="upload-select"
-          :type="filePath ? 'warning' : 'primary'"
-        >{{ filePath ? "变 更" : "选 择" }}
-        </el-button>
-      </el-upload>
-      <!-- [20210526][upd] 文件查看情景：文件已上传、文件查看页面 -->
-      <div
-        class="upload-view"
-        v-if="type == 'preview' || filePath"
-      >
-        <el-button
-          type="success"
-          @click="handleOnPreview(filePath)"
-        >查 看</el-button>
-        <el-button
-          v-if="resetButton"
-          type="danger"
-          @click="handleOnReset(filePath)"
-        >移 除</el-button>
-        <!-- 放大图片 -->
-        <!-- https://www.cnblogs.com/xiaoyao181/p/8550398.html -->
-        <preview-img
-          v-if="isPreview && fileType != 'pdf'"
-          @clickit="closePreview"
-          :imgSrc="filePreviewPath"
-        ></preview-img>
-        <!-- pdf -->
+        <i
+          slot="default"
+          class="el-icon-plus"
+        ></i>
         <div
-          class="group_img"
-          v-if="isPreview && fileType == 'pdf'"
+          slot="file"
+          slot-scope="{file}"
         >
-          <div
-            class="group_img_mask"
-            @click="closePreview"
-          ></div>
-          <iframe
-            title="查看文件"
-            :src="filePreviewPath"
-            width="100%"
-            height="100%"
-          ></iframe>
-          <!-- v-if="isCheckingFile && isPdfFile" -->
+          <img
+            class="el-upload-list__item-thumbnail"
+            :src="file.url"
+            alt=""
+          >
+          <span class="el-upload-list__item-actions">
+            <span
+              class="el-upload-list__item-preview"
+              @click="handlePictureCardPreview(file)"
+            >
+              <i class="el-icon-zoom-in"></i>
+            </span>
+            <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleDownload(file)"
+            >
+              <i class="el-icon-download"></i>
+            </span>
+            <span
+              v-if="!disabled"
+              class="el-upload-list__item-delete"
+              @click="handleRemove(file)"
+            >
+              <i class="el-icon-delete"></i>
+            </span>
+          </span>
         </div>
-      </div>
+      </upload>
+      <dialog :visible.sync="dialogVisible">
+        <img
+          width="100%"
+          :src="dialogImageUrl"
+          alt=""
+        >
+      </dialog>
     </div>
     <!-- 1110 提示语 -->
     <div class="tips"></div>
@@ -69,13 +63,15 @@
 
 <script>
 // 引入图片查看
+import { Message, Dialog, Upload } from 'element-ui'
 import PreviewImg from './preview'
-import { Message } from 'element-ui'
 import basic from '../../../src/mixin'
 export default {
-  name: 'EsUpload',
+  name: 'EsPictureCardUpload',
   components: {
     PreviewImg,
+    Dialog,
+    Upload
   },
   props: {
     // 文件类型：file/preview(预览)
@@ -86,7 +82,9 @@ export default {
     // 请求头
     headers: {
       type: Object,
-      default: ()=>{return{}}
+      default: () => {
+        return {}
+      },
     },
     // 文件路径
     filePath: {
@@ -101,7 +99,7 @@ export default {
     // 文件列表类型 text/picture/picture-card
     listType: {
       type: String,
-      default: 'text'
+      default: 'text',
     },
     // 文件上传配置
     setting: {
@@ -112,8 +110,12 @@ export default {
     },
     // [20210527][crt] 重写上传前执行方法
     beforeUpload: {
-      type: [Function, String, Boolean, Number, Object],
-      default: null,
+      type: Function,
+      default: (file)=>true,
+    },
+    onSuccess: {
+      type: Function,
+      default: ()=>{}
     },
     // [20210527][crt] 是否使用引入pdf预览方法
     pdfPreview: {
@@ -129,13 +131,30 @@ export default {
   mixins: [basic],
   data() {
     return {
+      file: '',
+      dialogImageUrl: '',
+      dialogVisible: false,
+      
       fileType: '', // 文件类型
       isPreview: false, // 查看文件中
       filePreviewPath: '', // 预览文件路径
     }
     // fileUploadAction: 'http://192.168.200.203:8099/index/upload', // 1110 文件上传接口
   },
+  created(){
+  },
   methods: {
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    handleRemove(file) {
+      console.log(file)
+    },
+    handleDownload(file) {
+      console.log(file)
+    },
+
     // [20210527][cpy] 文件上传前触发
     handleBeforeUpload(file) {
       let { accept, fileSize } = this.setting
@@ -168,10 +187,13 @@ export default {
       return true
     },
     // [20210527][upd] 文件上传成功后触发
-    handleOnSuccess(response, form, field) {
-      this.$emit('on-success', response)
+    handleOnSuccess(response, item, form) {
+      debugger
+
+      this.onSuccess(response, item, form)
+      // this.$emit('on-success', response)
       Message.success('上传成功')
-      this.loadEnd()
+      // this.loadEnd()
     },
     // [20210527]][cpy] 上传失败触发
     handleOnError(err, file, fileList) {
@@ -240,5 +262,8 @@ export default {
 }
 .es-upload .upload .upload-comp {
   margin-right: 10px;
+}
+.es-upload .el-upload-list--picture-card+.el-upload--picture-card{
+  /* display: none; */
 }
 </style>
