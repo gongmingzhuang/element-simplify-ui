@@ -178,7 +178,7 @@
                     :key="index+'_'+itm.value"
                     :name="item.prop"
                     :label="itm.value"
-                    :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)
+                    :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)
                     || ( 
                       item.setting.singleDisabled 
                       && item.setting.singleDisabled.ctrl 
@@ -208,7 +208,7 @@
               <el-select
                 v-model="form[item.prop]"
                 :placeholder="item.placeholder || '请选择'"
-                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 @change="(val) => item.changeEvent(val, item, form)"
               >
                 <el-option
@@ -238,12 +238,12 @@
                   :options="item.setting && item.setting.onlyProvinceAndCity ? provinceAndCityOptions : regionOptions"
                   v-model="regionConfig[item.prop]"
                   @change="val=>handleChangeRegion(val,item)"
-                  :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                  :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 >
                 </el-cascader>
                 <el-input
                   v-if="item.setting && item.setting.detail"
-                  :readonly="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                  :readonly="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                   type="textarea"
                   v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
                   row="3"
@@ -258,7 +258,7 @@
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
-                :disabled="item.setting && item.setting.disabled || (formSetting.loadingCtrl && $props.loading)"
+                :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -318,6 +318,7 @@
                 :name="item.prop"
                 :item="item"
                 :form="form"
+                :rules="rules"
               />
             </template>
             <!-- [upg][20210622] 后置插槽 -->
