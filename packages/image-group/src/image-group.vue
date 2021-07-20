@@ -4,9 +4,9 @@
     :class="item.prop"
   >
     <template v-for="(itm, idx) in item.group">
-      <form-item
-        class="d-flex"
+      <el-form-item
         v-if="(!itm.invisibleControl || itm.invisibleControl(itm, form))"
+        class="d-flex"
         :label="itm.label"
         :key="idx"
         :prop="itm.prop"
@@ -16,8 +16,10 @@
           v-show="0"
         />
         <es-avatar-upload
+          ref="es-avatar-upload"
           :form="form"
           :item="itm"
+          :img-url="itm.value"
           :headers="item.setting.headers"
           :action="item.setting.action"
           :accept="item.setting.accept"
@@ -25,7 +27,7 @@
           :before-upload="item.setting.beforeUpload"
           :on-success="item.setting.onSuccess"
         />
-      </form-item>
+      </el-form-item>
     </template>
   </div>
 </template>
@@ -35,7 +37,6 @@
  * @author: gongmingzhuang
  *
  */
-import { FormItem } from 'element-ui'
 import EsAvatarUpload from '../../upload/src/avatar-upload'
 import VALID_SET from '../../../lib/validate'
 import UTIL from '../../../util/util.js'
@@ -43,7 +44,6 @@ import UTIL from '../../../util/util.js'
 export default {
   name: 'EsImageGroup',
   components: {
-    FormItem,
     EsAvatarUpload,
   },
   props: {
@@ -75,6 +75,7 @@ export default {
     },
   },
   data() {
+    let _that = this
     return {
       VALID_SET,
       UTIL
@@ -86,17 +87,23 @@ export default {
         this.init()
       },
       deep: true,
-    },
+    }
   },
   created() {
+    // debugger
     this.init()
   },
   methods: {
     //
     init() {
-      this.item.group.forEach((itm) => {
+      this.item.group.forEach((itm, idx) => {
         this.$set(this.form, itm.prop, '')
         this.$set(this.rules, itm.prop, [])
+        // 重置预览图片
+        let _curComp = this.$refs['es-avatar-upload'] && this.$refs['es-avatar-upload'][idx]
+        if(_curComp){
+          _curComp.manipulateResetImageUrl()
+        }
         if (itm.validate) {
           let _valid = this.VALID_SET[itm.validate[0]](itm, this.columns, this)
           this.rules[itm.prop].push(_valid)
@@ -113,6 +120,11 @@ export default {
     handleOnReset(res, imgItem, setting) {
       setting.onSuccess(res, item, this.form)
     },
+    handleResetPreviewImageUrl(){
+      this.item.group.forEach(itm=>{
+
+      })
+    }
   },
 }
 </script>

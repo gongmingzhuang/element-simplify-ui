@@ -62,10 +62,21 @@ export default {
       type: Boolean,
       default: false,
     },
+    imgUrl: {
+      type: String, 
+      default: ''
+    }
   },
   data() {
     return {
       imageUrl: '',
+    }
+  },
+  watch:{
+    imgUrl: {
+      handler(val){
+        this.mainpulateSetImageUrl(val)
+      }
     }
   },
   methods: {
@@ -113,6 +124,12 @@ export default {
       }
       return true
     },
+    manipulateResetImageUrl(){
+      this.imageUrl = ''
+    },
+    mainpulateSetImageUrl(filePath){
+      this.imageUrl = filePath
+    }
   },
 }
 </script>

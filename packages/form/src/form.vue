@@ -51,11 +51,12 @@
         <!-- [upg][20210714] 新增item.setting.styleClass 添加类名 -->
         <!-- [upg][20210714] 新增 crediteCode/name/phone，配置默认校验规则 -->
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
+        <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
           v-else-if="item.type != 'image-group' && item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
-          :label="!labelWidth ? '' : (showLabel && item.label)"
+          :label="!labelWidth ? '' : (showLabel && (item.setting && item.setting.dynamicLabel ? item.setting.dynamicLabel(form, formColumns[index]) : item.label))"
           :label-width="labelWidth || item.labelWidth"
           :key="index"
           :prop="item.prop"
@@ -336,7 +337,15 @@
         </el-form-item>
         <!-- [upg][20210714] 新增图片组 -->
         <template v-if="item.type == 'image-group' && (!item.invisibleControl || item.invisibleControl(item, form))">
+          <es-image-group
+            class="ig"
+            :columns="formColumns"
+            :item="item"
+            :form="form"
+            :rules="rules"
+          />
           <div
+            v-if="0"
             class="image-group d-flex flex-wrap w-100"
             :class="item.prop"
           >
@@ -402,6 +411,7 @@
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
+import EsImageGroup from '../../image-group/src/image-group'
 import EsUpload from '../../upload/src/upload'
 import VALID_SET from '../../../lib/validate'
 import UTIL from '../../../util/util.js'
@@ -418,6 +428,7 @@ export default {
   name: 'EsForm',
   components: {
     EsButtonGroup,
+    EsImageGroup,
     EsUpload
   },
   props: {
@@ -672,18 +683,19 @@ export default {
 
           // [20210714][crt] type：image-group 按钮组
           if (item.type == 'image-group') {
-            item.group.forEach(imgItem => {
-              this.$set(this.form, imgItem.prop, '')
-              this.$set(this.rules, imgItem.prop, [])
-              if (imgItem.validate) {
-                let _imgValid = _that.VALID_SET[imgItem.validate[0]](
-                  imgItem,
-                  _that.formColumns,
-                  _that
-                )
-                this.rules[imgItem.prop].push(_imgValid)
-              }
-            })
+            0 &&
+              item.group.forEach(imgItem => {
+                this.$set(this.form, imgItem.prop, '')
+                this.$set(this.rules, imgItem.prop, [])
+                if (imgItem.validate) {
+                  let _imgValid = _that.VALID_SET[imgItem.validate[0]](
+                    imgItem,
+                    _that.formColumns,
+                    _that
+                  )
+                  this.rules[imgItem.prop].push(_imgValid)
+                }
+              })
           }
 
           if (item.validate) {
