@@ -125,6 +125,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    // [20210726]
+    preview: {
+      type: Function,
+      default: ()=>{return{}}
+    }
   },
   mixins: [basic],
   data() {
@@ -187,6 +192,13 @@ export default {
     },
     // [20210527][upd] 查看文件
     handleOnPreview(path) {
+      this.preview(path).then(res=>{
+        // debugger
+        this.isPreview = true
+        this.filePreviewPath =  res
+      })
+      // this.$emit('on-preview', path)
+      return
       let filePath = this.filePath
 
       let _this = this

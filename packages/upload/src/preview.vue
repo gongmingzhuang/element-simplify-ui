@@ -1,7 +1,10 @@
 <template>
   <!-- 过渡动画 -->
   <transition name="fade">
-    <div class="img-view" @click="bigImg">
+    <div
+      class="img-view"
+      @click="bigImg"
+    >
       <!-- 遮罩层 -->
       <div class="img-layer"></div>
       <div class="img">
@@ -12,14 +15,14 @@
 </template>
 <script>
 export default {
-  props: ["imgSrc"], //接受图片地址
+  props: ['imgSrc'], //接受图片地址
   methods: {
     bigImg() {
       // 发送事件
-      this.$emit("clickit");
+      this.$emit('clickit')
     }
   }
-};
+}
 </script>
 <style lang="less">
 /*动画*/
@@ -58,9 +61,11 @@ export default {
     top: 50%;
     left: 50%;
     z-index: 2001;
-    min-width: 80vw;
-    height: 80vh;
+    height: 90vh;
+    padding: 20px 0;
     overflow-y: auto;
+    // min-width: 80vw;
+    // height: 80vh;
     transform: translate(-50%, -50%);
   }
 }
@@ -80,7 +85,7 @@ export default {
   // max-width: 100%;
   width: 100%;
   display: block;
-  position: absolute;
+  // position: absolute;
   left: 0;
   right: 0;
   margin: auto;

@@ -19,7 +19,6 @@
           ref="es-avatar-upload"
           :form="form"
           :item="itm"
-          :img-url="itm.value"
           :headers="item.setting.headers"
           :action="item.setting.action"
           :accept="item.setting.accept"
@@ -44,35 +43,35 @@ import UTIL from '../../../util/util.js'
 export default {
   name: 'EsImageGroup',
   components: {
-    EsAvatarUpload,
+    EsAvatarUpload
   },
   props: {
     item: {
       type: Object,
       default: () => {
         return {}
-      },
+      }
     },
     columns: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     form: {
       type: Object,
       default: () => {
         return {}
-      },
+      }
     },
     rules: {
       type: Object,
       default: () => {
         return {}
-      },
+      }
     },
     loading: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     let _that = this
@@ -82,11 +81,12 @@ export default {
     }
   },
   watch: {
-    'item': {
+    item: {
       handler: function (newVal) {
         this.init()
       },
-      deep: true,
+      immediate: true,
+      deep: true
     }
   },
   created() {
@@ -101,7 +101,7 @@ export default {
         this.$set(this.rules, itm.prop, [])
         // 重置预览图片
         let _curComp = this.$refs['es-avatar-upload'] && this.$refs['es-avatar-upload'][idx]
-        if(_curComp){
+        if (_curComp) {
           _curComp.manipulateResetImageUrl()
         }
         if (itm.validate) {
@@ -120,12 +120,10 @@ export default {
     handleOnReset(res, imgItem, setting) {
       setting.onSuccess(res, item, this.form)
     },
-    handleResetPreviewImageUrl(){
-      this.item.group.forEach(itm=>{
-
-      })
+    handleResetPreviewImageUrl() {
+      this.item.group.forEach(itm => {})
     }
-  },
+  }
 }
 </script>
 <style lang="less">

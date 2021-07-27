@@ -1,7 +1,6 @@
 <template>
   <div class="es-form">
-    <!-- >>> {{formColumns}} -->
-    <!-- {{form.avatar1}} -->
+    {{rules}}
     <el-form
       ref="form"
       :model="form"
@@ -71,7 +70,7 @@
                 <span>{{(form[item.prop] && UTIL.moneyFormat(form[item.prop])) || (UTIL.moneyFormat(0)) }}</span>
               </template>
               <template v-else-if="item.render">
-                <div v-html='item.render(item, form)'></div>
+                <div v-html='item.render()'></div>
               </template>
               <template v-else>
                 <span>{{form[item.prop] || '-'}}</span>
@@ -175,10 +174,7 @@
             <!-- [crt][20210621] 复选框 -->
             <!-- [crt][20210706] singleDisabled: 单独控制不可点击 -->
             <template v-if="item.type=='checkbox'">
-              <el-checkbox-group
-                v-model="form[item.prop]"
-                @change="val => item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
-              >
+              <el-checkbox-group v-model="form[item.prop]">
                 <template v-for="(itm,idx) in item.translate">
                   <el-checkbox
                     :key="index+'_'+itm.value"
@@ -215,7 +211,7 @@
                 v-model="form[item.prop]"
                 :placeholder="item.placeholder || '请选择'"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                @change="(val) => item.hasOwnProperty('changeEvent') ? item.changeEvent(val, item, form) : item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
+                @change="(val) => item.changeEvent(val, item, form)"
               >
                 <el-option
                   v-for="itm in item.translate"
@@ -230,40 +226,49 @@
             <!-- [upg][20210706]: 详细地址只读属性添加-->
             <!-- [upg][20210714]: 支持只选省市 onlyProvinceAndCity -->
             <template v-if="item.type=='address'">
-              <el-input
-                v-model="form[item.prop]"
-                v-show="false"
-              />
-              <div class="address">
-                <el-cascader
-                  size="large"
-                  :options="item.setting && item.setting.onlyProvinceAndCity ? provinceAndCityOptions : regionOptions"
-                  v-model="regionConfig ? regionConfig[item.prop] : form[item.prop]"
-                  @change="val=>handleChangeRegion(val,item)"
-                  :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                >
-                </el-cascader>
+              <es-addr
+                v-if="1"
+                :value.sync="form[item.prop]"
+                :form.sync="form"
+                :rules.sync="rules"
+                :columns="formColumns"
+                :item="item"
+                v-bind="{...$props}"
+                @assignForm="assignForm"
+                @assignRule="assignRule"
+              ></es-addr>
+
+              <div v-else>
                 <el-input
-                  v-if="item.setting && item.setting.detail"
-                  :readonly="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                  type="textarea"
-                  v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
-                  row="3"
-                  resize="none"
-                  :placeholder="item.setting && item.setting.detail && item.setting.detail.placeholder || '请输入详细地址'"
+                  v-model="form[item.prop]"
+                  v-show="false"
                 />
+                <el-input
+                  v-model="form[item.prop]"
+                  v-show="false"
+                />
+                <div class="address">
+                  <el-cascader
+                    size="large"
+                    :options="item.setting && item.setting.onlyProvinceAndCity ? provinceAndCityOptions : regionOptions"
+                    v-model="regionConfig ? regionConfig[item.prop] : form[item.prop]"
+                    @change="val=>handleChangeRegion(val,item)"
+                    :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                  >
+                  </el-cascader>
+                  <el-input
+                    v-if="item.setting && item.setting.detail"
+                    :readonly="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                    type="textarea"
+                    v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
+                    row="3"
+                    resize="none"
+                    :placeholder="item.setting && item.setting.detail && item.setting.detail.placeholder || '请输入详细地址'"
+                  />
+                </div>
               </div>
             </template>
             <!-- 日期选择框 -->
-            <!-- [20210726][upd] 移除组件格式化功能 -->
-            <template v-if="item.type=='date'">
-              <el-date-picker
-                @change="date => {dateFormatting(date, item)}"
-                v-model="form[item.prop]"
-                :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                type="date"
-              />
-            </template>
             <!-- [20210714][upd] 移除组件格式化功能 -->
             <template v-if="item.type=='dateRange'">
               <el-date-picker
@@ -314,15 +319,14 @@
               />
               <es-upload
                 :type="item.type"
-                :headers="item.setting && item.setting.headers"
                 :action="item.setting.action || '/'"
                 :file-path="form[item.prop]"
                 :setting="item.setting"
+                :reset-button="item.resetButton"
                 :pdf-preview="item.onPdfPreview"
                 :before-upload="item.beforeUpload"
-                :preview="val => item.setting.onPreview(val,item, item.setting)"
-                @on-success="res => handleOnSuccess(res,item, item.setting)"
-                @on-reset="res=>handleOnReset(res,item, item.setting)"
+                @on-success="res => handleOnSuccess(res,item)"
+                @on-reset="res=>handleOnReset(res,item)"
               />
             </template>
             <!-- [crt][20210621] 兼容额外字段 -->
@@ -422,6 +426,7 @@
  * [20210622][crt] 新增插槽form-item 前置插槽/后置插槽/按钮组前置插槽
  */
 import { Form } from 'element-ui'
+import EsAddr from './addr'
 import EsButtonGroup from '../../button-group/src/button-group'
 import EsImageGroup from '../../image-group/src/image-group'
 import EsUpload from '../../upload/src/upload'
@@ -439,11 +444,16 @@ import {
 export default {
   name: 'EsForm',
   components: {
+    EsAddr,
     EsButtonGroup,
     EsImageGroup,
     EsUpload
   },
   props: {
+    isPop: {
+      type: Boolean,
+      default: true
+    },
     // 显示label
     showLabel: {
       type: Boolean,
@@ -533,6 +543,17 @@ export default {
       },
       immediate: true,
       deep: true
+    },
+    // 初始化
+    isPop: {
+      handler(isPop) {
+        isPop &&
+          this.$nextTick(() => {
+            this.$refs.form.clearValidate()
+            this.$refs.form.resetFields()
+          })
+      },
+      immediate: true
     }
   },
   created() {
@@ -541,6 +562,19 @@ export default {
   },
   mounted() {},
   methods: {
+    // this.$refs['es-form'].clearAndReset()
+    clearAndReset() {
+      this.$nextTick(() => {
+        this.$refs.form.clearValidate()
+        this.$refs.form.resetFields()
+      })
+    },
+    assignForm(item){
+      Object.assign(this.form, item)
+    },
+    assignRule(item){
+      Object.assign(this.rules, item)
+    },
     // [20210629][upg] 初始化表单
     initForm() {
       let _that = this
@@ -583,12 +617,12 @@ export default {
             this.$set(this.form, item.prop, [])
           }
           // [20210701] 地址控件
-          if (item.type == 'address' && item.setting && item.setting.detail) {
-            this.$set(this.form, item.setting.detail.prop, '')
-          }
-          if (item.type == 'address') {
-            this.$set(this.regionConfig, item.prop, [])
-          }
+          // if (item.type == 'address' && item.setting && item.setting.detail) {
+          //   this.$set(this.form, item.setting.detail.prop, '')
+          // }
+          // if (item.type == 'address') {
+          //   this.$set(this.regionConfig, item.prop, [])
+          // }
           // [20210714] type: creditCode 内置类型统一社会信用代码配置默认参数
           if (item.type == 'creditCode') {
             item.maxlength = item.maxlength || 18
@@ -723,16 +757,8 @@ export default {
                   // 默认校验
                   _valid = _that.VALID_SET[itm](item, _that.formColumns, _that)
                 } else if (itm instanceof Object && itm.hasOwnProperty('validator')) {
-                  if (_that.VALID_SET.hasOwnProperty(itm.validator)) {
-                    // [20210621][upg] 追加支持默认校验规则配置提示语
-                    _valid = _that.VALID_SET[itm.validator](item, itm, _that.formColumns, _that)
-                  } else {
-                    let _validate = _that.validateCustomList.find(it => it.validName == itm.validator)
-                    if (_validate) {
-                      _valid.validator = _validate.validator(item, this, itm)
-                      _valid.trigger = _validate.trigger || ['blur', 'change']
-                    }
-                  }
+                  // [20210621][upg] 追加支持默认校验规则配置提示语
+                  _valid = _that.VALID_SET[itm.validator](item, itm, _that.formColumns, _that)
                 } else {
                   // 自定义校验
                   this.validateCustomList.forEach(vitem => {
@@ -812,7 +838,6 @@ export default {
       }
       // dateRange / dateRangeSwitch[switch: FALSE]
       if (
-        item.type != 'date' && 
         !item.setting.hasOwnProperty('switch') ||
         (item.setting.hasOwnProperty('switch') && !item.setting.switch)
       ) {
@@ -910,15 +935,6 @@ export default {
       // this.regionConfig[prop].forEach(item => {
       //   regionLen += CodeToText[item].length * 15
       // })
-    },
-    // [20210726][crt] 文件预览
-    handleOnPreview(path, item, setting) {
-      return new Promise((resolve, reject) => {
-        setting.onPreview(path, item, this.form).then(res => {
-          debugger
-          resolve(res)
-        })
-      })
     },
     // [20210525][crt] 文件上传成功
     handleOnSuccess(res, item, setting) {
@@ -1127,8 +1143,13 @@ export default {
       margin: 0 20px 22px;
     }
   }
+  // 复选框
+  .el-checkbox-group {
+    height: unset;
+    max-height: 200px;
+  }
   // 单选框
-  .el-radio-group {
+  .el-radio-group{
     padding-top: 13px;
   }
 }

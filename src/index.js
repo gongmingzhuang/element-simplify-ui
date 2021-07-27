@@ -8,6 +8,7 @@ import EsDialog from "../packages/dialog/index"
 import EsDialogForm from "../packages/dialog-form/index"
 import EsForm from "../packages/form/index"
 import EsMenu from "../packages/menu/index"
+import EsImageGroup from "../packages/image-group/index"
 import EsQuery from "../packages/query/index"
 import EsTable from "../packages/table/index"
 import EsTabs from "../packages/tabs/index"
@@ -26,6 +27,7 @@ const components = [
   EsDialog,
   EsDialogForm,
   EsForm,
+  EsImageGroup,
   EsMenu,
   EsQuery,
   EsTable,
@@ -57,6 +59,7 @@ export default {
   EsDialog,
   EsDialogForm,
   EsForm,
+  EsImageGroup,
   EsMenu,
   EsQuery,
   EsTable,

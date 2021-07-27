@@ -1,16 +1,23 @@
 <template>
   <div>
+    <!-- {{item}} -->
     <el-upload
+      ref="el-upload"
       class="avatar-uploader"
       :action="action"
       :show-file-list="false"
       :headers="headers"
-      :before-upload="file => manipulateBeforeUpload(file, $attrs.item, $attrs.form)"
-      :on-success="(response,file,fileList) => mainpulateOnSuccess(response, file, $attrs.item, $attrs.form)"
+      :before-upload="file => manipulateBeforeUpload(file, item, form)"
+      :on-success="(response,file,fileList) => mainpulateOnSuccess(response, file, item, form)"
     >
       <img
         v-if="imageUrl"
         :src="imageUrl"
+        class="avatar"
+      >
+      <img
+        v-else-if="item.setting.previewUrl"
+        :src="item.setting.previewUrl"
         class="avatar"
       >
       <i
@@ -25,7 +32,7 @@
 /**
  * @author: gongmingzhuang
  * @time: 20210715
- * 
+ *
  * e.g. <es-avatar-upload action="#" :accept="['jpg', 'png']" :file-size="1" :onSuccess="handleOnSuccess"/>
  */
 import { Message } from 'element-ui'
@@ -36,52 +43,76 @@ export default {
       type: Object,
       default: () => {
         return {}
-      },
+      }
     },
     accept: {
       type: Array,
-      default: () => ['jpg', 'png'],
+      default: () => ['jpg', 'png']
+    },
+    form: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    item: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     },
     fileSize: {
       type: Number,
-      default: 1,
+      default: 1
     },
     action: {
       type: String,
-      default: '#',
+      default: '#'
     },
     beforeUpload: {
       type: Function,
-      default: (file) => true,
+      default: file => true
     },
     onSuccess: {
       type: Function,
-      default: () => {},
+      default: () => {}
     },
     overrideBeforeUpload: {
       type: Boolean,
-      default: false,
+      default: false
     },
     imgUrl: {
-      type: String, 
+      type: String,
       default: ''
     }
   },
   data() {
     return {
-      imageUrl: '',
+      imageUrl: ''
     }
   },
-  watch:{
-    imgUrl: {
-      handler(val){
+  watch: {
+    item: {
+      handler(itm) {
+        this.mainpulateSetImageUrl(itm.setting.previewUrl)
+      },
+      immediate: true,
+      deep: true
+    },
+    'item.previewUrl': {
+      handler(val) {
+        // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>", val)
         this.mainpulateSetImageUrl(val)
-      }
+      },
+      // immediate: true
     }
   },
+  created() {},
   methods: {
     mainpulateOnSuccess(response, file, item, form) {
       this.imageUrl = URL.createObjectURL(file.raw)
+      // this.$set(this.item, 'previewUrl', URL.createObjectURL(file.raw))
+      this.item.setting.previewUrl = URL.createObjectURL(file.raw)
       if (this.onSuccess) {
         this.onSuccess(response, item, form)
       }
@@ -96,7 +127,7 @@ export default {
       let fileSize = this.fileSize
       let { type, size } = file
       let transferAccept = [] // 格式转换数组
-      accept.forEach((item) => {
+      accept.forEach(item => {
         switch (item) {
           case 'jpg':
             transferAccept.push('image/jpeg')
@@ -124,18 +155,20 @@ export default {
       }
       return true
     },
-    manipulateResetImageUrl(){
+    manipulateResetImageUrl() {
       this.imageUrl = ''
+      this.item.previewUrl = ''
     },
-    mainpulateSetImageUrl(filePath){
+    mainpulateSetImageUrl(filePath) {
       this.imageUrl = filePath
+      this.item.previewUrl = filePath
     }
-  },
+  }
 }
 </script>
 
 <style>
-.avatar-uploader{
+.avatar-uploader {
   line-height: normal;
 }
 .avatar-uploader .el-upload {

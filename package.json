@@ -1,6 +1,6 @@
 {
   "name": "element-simplify-ui",
-  "version": "1.0.44",
+  "version": "1.0.54",
   "description": "基于element-ui 进行二次简化封装",
   "main": "src/index.js",
   "scripts": {
@@ -33,8 +33,5 @@
     "less-loader": "^5.0.0",
     "moment": "^2.29.1",
     "vue": "^2.6.12"
-  },
-  "__npminstall_done": "Wed Jul 14 2021 10:47:25 GMT+0800 (中国标准时间)",
-  "_from": "element-simplify-ui@1.0.39",
-  "_resolved": "https://registry.nlark.com/element-simplify-ui/download/element-simplify-ui-1.0.39.tgz"
+  }
 }
