@@ -3,7 +3,23 @@
     class="image-group d-flex flex-wrap w-100"
     :class="item.prop"
   >
+    <div v-show="0">
+      {{form}}
+      <hr>
+    </div>
+    <div v-show="0">
+      {{columns}}
+      <hr>
+    </div>
+    <div v-show="0">
+      {{item.group}}
+      <hr>
+    </div>
     <template v-for="(itm, idx) in item.group">
+      <div v-show="0">
+        {{itm}}
+        <hr>
+      </div>
       <el-form-item
         v-if="(!itm.invisibleControl || itm.invisibleControl(itm, form))"
         class="d-flex"
@@ -12,8 +28,9 @@
         :prop="itm.prop"
       >
         <el-input
-          v-model="form[itm.prop]"
           v-show="0"
+          v-model="form[itm.prop]"
+          :readonly="true"
         />
         <es-avatar-upload
           ref="es-avatar-upload"
@@ -83,7 +100,7 @@ export default {
   watch: {
     item: {
       handler: function (newVal) {
-        this.init()
+        // this.init()
       },
       immediate: true,
       deep: true
@@ -97,7 +114,7 @@ export default {
     //
     init() {
       this.item.group.forEach((itm, idx) => {
-        this.$set(this.form, itm.prop, '')
+        this.$set(this.form, itm.prop, itm.value || '')
         this.$set(this.rules, itm.prop, [])
         // 重置预览图片
         let _curComp = this.$refs['es-avatar-upload'] && this.$refs['es-avatar-upload'][idx]

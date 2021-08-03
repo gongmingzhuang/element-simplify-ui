@@ -19,15 +19,6 @@
       :rules="rules"
     >
       <template v-for="(item, index) of formColumns">
-
-        <div
-          v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
-          class="type-tip"
-          :style="{width: '100%'}"
-        >
-          <span class="tip-title">{{item.label}}</span>
-          <span class="tip-tip">{{item.tip}}</span>
-        </div>
         <!-- [upg][20210622] 前置插槽，不推荐使用 -->
         <div
           class="prefix-slot"
@@ -49,7 +40,7 @@
         </template>
         <!-- [upg][20210706]: 隐藏域字段-->
         <el-form-item
-          v-if="item.type=='hidden'"
+          v-else-if="item.type=='hidden'"
           class="hidden"
         >
           <el-input
@@ -73,7 +64,7 @@
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
-          v-if="item.type != 'image-group' && (item.type != 'tip' && item.type != 'title' && item.type != 'hidden') && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
+          v-else-if="item.type != 'image-group' && item.invisibleControl ? item.invisibleControl(item, form) : true"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && (item.setting && item.setting.dynamicLabel ? item.setting.dynamicLabel(form, formColumns[index]) : item.label))"
@@ -257,13 +248,29 @@
             <!-- [upg][20210706]: 详细地址只读属性添加-->
             <!-- [upg][20210714]: 支持只选省市 onlyProvinceAndCity -->
             <template v-if="item.type=='address'">
-              <es-addr
-                :columns="formColumns"
-                :item="item"
-                :form.sync="form"
-                :rules="rules"
-                v-bind="{...$props, ...$attrs}"
-              ></es-addr>
+              <el-input
+                v-model="form[item.prop]"
+                v-show="false"
+              />
+              <div class="address">
+                <el-cascader
+                  size="large"
+                  :options="item.setting && item.setting.onlyProvinceAndCity ? provinceAndCityOptions : regionOptions"
+                  v-model="regionConfig ? regionConfig[item.prop] : form[item.prop]"
+                  @change="val=>handleChangeRegion(val,item)"
+                  :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                >
+                </el-cascader>
+                <el-input
+                  v-if="item.setting && item.setting.detail"
+                  :readonly="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                  type="textarea"
+                  v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
+                  row="3"
+                  resize="none"
+                  :placeholder="item.setting && item.setting.detail && item.setting.detail.placeholder || '请输入详细地址'"
+                />
+              </div>
             </template>
             <!-- 日期选择框 -->
             <!-- [20210726][upd] 移除组件格式化功能 -->
@@ -282,8 +289,8 @@
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                type="daterange"
                 :picker-options="item.setting && item.setting.pickerOptions"
+                type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
@@ -383,10 +390,9 @@
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
+import EsDateRangeSwitch from '../../form/src/date-range-switch'
 import EsImageGroup from '../../image-group/src/image-group'
-import EsAddr from './addr'
-import EsDateRangeSwitch from './date-range-switch'
-import EsTextarea from './textarea'
+import EsTextarea from '../../form/src/textarea'
 import EsUpload from '../../upload/src/upload'
 import VALID_SET from '../../../lib/validate'
 import UTIL from '../../../util/util.js'
@@ -400,13 +406,12 @@ import {
   TextToCode
 } from 'element-china-area-data'
 export default {
-  name: 'EsForm',
+  name: 'EsEditForm',
   components: {
-    EsAddr,
-    EsDateRangeSwitch,
-    EsTextarea,
     EsButtonGroup,
+    EsDateRangeSwitch,
     EsImageGroup,
+    EsTextarea,
     EsUpload
   },
   props: {
@@ -495,7 +500,7 @@ export default {
   watch: {
     formColumns: {
       handler: function (newColumns) {
-        // this.initForm()
+        this.initForm()
         // debugger
       },
       immediate: true,
@@ -667,6 +672,14 @@ export default {
           item.group.forEach(imgItem => {
             this.$set(this.form, imgItem.prop, imgItem.value || '')
           })
+        }
+        if (item.type == 'dateRangeSwitch') {
+          if (item.value && item.value instanceof Array && item.value.length == 2) {
+            let _props = item.props
+            this.$set(this.form, _props[0], item.value[0])
+            this.$set(this.form, _props[1], item.value[1])
+
+          }
         }
       })
     },
@@ -1000,14 +1013,6 @@ export default {
   // 单选框
   .el-radio-group {
     padding-top: 13px;
-  }
-  // 提示类型
-  .type-tip {
-    margin: 20px;
-    .tip-title {
-      font-weight: bold;
-      margin-right: 20px;
-    }
   }
 }
 </style>

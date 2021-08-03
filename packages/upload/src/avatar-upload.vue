@@ -1,30 +1,57 @@
 <template>
-  <div>
+  <div class="">
     <!-- {{item}} -->
-    <el-upload
-      ref="el-upload"
-      class="avatar-uploader"
-      :action="action"
-      :show-file-list="false"
-      :headers="headers"
-      :before-upload="file => manipulateBeforeUpload(file, item, form)"
-      :on-success="(response,file,fileList) => mainpulateOnSuccess(response, file, item, form)"
+    <div v-show="0">
+      {{form}}
+      <hr>
+    </div>
+    <div v-show="0">
+      {{item}}
+      <hr>
+    </div>
+    <!-- 预览控件 -->
+    <div
+      class="avatar-uploader preview-container"
+      v-if="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('isPreview') && item.setting.isPreview"
     >
       <img
-        v-if="imageUrl"
-        :src="imageUrl"
-        class="avatar"
-      >
-      <img
-        v-else-if="item.setting.previewUrl"
         :src="item.setting.previewUrl"
-        class="avatar"
+        class="avatar preview"
+        @click="isPreview = true"
       >
-      <i
-        v-else
-        class="el-icon-plus avatar-uploader-icon"
-      ></i>
-    </el-upload>
+      <preview-img
+        v-if="isPreview"
+        @clickit="isPreview = false"
+        :imgSrc="item.setting.previewUrl"
+      ></preview-img>
+    </div>
+    <!-- 上传控件 -->
+    <div v-else>
+      <el-upload
+        ref="el-upload"
+        class="avatar-uploader"
+        :action="action"
+        :show-file-list="false"
+        :headers="headers"
+        :before-upload="file => manipulateBeforeUpload(file, item, form)"
+        :on-success="(response,file,fileList) => mainpulateOnSuccess(response, file, item, form)"
+      >
+        <img
+          v-if="imageUrl"
+          :src="imageUrl"
+          class="avatar static"
+        >
+        <img
+          v-else-if="item.setting.previewUrl"
+          :src="item.setting.previewUrl"
+          class="avatar dynamic"
+        >
+        <i
+          v-else
+          class="el-icon-plus avatar-uploader-icon"
+        ></i>
+      </el-upload>
+    </div>
   </div>
 </template>
 
@@ -36,6 +63,7 @@
  * e.g. <es-avatar-upload action="#" :accept="['jpg', 'png']" :file-size="1" :onSuccess="handleOnSuccess"/>
  */
 import { Message } from 'element-ui'
+import previewImg from './preview'
 export default {
   name: 'EsAvatarUpload',
   props: {
@@ -86,9 +114,13 @@ export default {
       default: ''
     }
   },
+  components: {
+    previewImg
+  },
   data() {
     return {
-      imageUrl: ''
+      imageUrl: '',
+      isPreview: false
     }
   },
   watch: {
@@ -101,9 +133,8 @@ export default {
     },
     'item.previewUrl': {
       handler(val) {
-        // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>", val)
         this.mainpulateSetImageUrl(val)
-      },
+      }
       // immediate: true
     }
   },
@@ -167,9 +198,16 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
 .avatar-uploader {
   line-height: normal;
+  &.preview-container{
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
 }
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;

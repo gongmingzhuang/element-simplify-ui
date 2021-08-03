@@ -1,5 +1,5 @@
 <template>
-  <div class="es-addr w-100">
+  <div class="es-textarea w-100">
     <div v-show="0">
       {{form}}
     </div>
@@ -7,32 +7,14 @@
       {{item}}
     </div>
     <el-input
-      class="form-item"
-      type="hidden"
-      :readonly="true"
-      v-model="form[item.prop]"
-     />
-    <el-cascader
-      size="large"
-      :options="regionOption"
-      v-model="region"
-      @change="val=>handleChangeRegion(val,item)"
-    />
-    <!-- <el-cascader
-      size="large"
-      :options="regionOption"
-      v-model="regionConfig ? regionConfig[item.prop] : form[item.prop]"
-      :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-    /> -->
-    <!-- <el-input
-      v-if="item.setting && item.setting.detail"
-      :readonly="item.setting && (item.setting.disabled || item.setting.readonly)"
       type="textarea"
-      v-model="form[item.setting && item.setting.detail && item.setting.detail.prop]"
-      row="3"
+      :maxlength="item.hasOwnProperty('maxlength') && item.maxlength || 50"
+      :rows="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('rows') && item.setting.rows || 2"
+      :placeholder="item.hasOwnProperty('placeholder') && item.placeholder || `请输入${item.label}`"
+      v-model="form[item.prop]"
       resize="none"
-      :placeholder="item.setting && item.setting.detail && item.setting.detail.placeholder || '请输入详细地址'"
-    /> -->
+    >
+    </el-input>
   </div>
 </template>
 
@@ -40,19 +22,10 @@
 /**
  * @author: gongmingzhuang
  */
-// 省市区联动数据
-import {
-  provinceAndCityData,
-  regionData,
-  provinceAndCityDataPlus,
-  regionDataPlus,
-  CodeToText,
-  TextToCode
-} from 'element-china-area-data'
 import VALID_SET from '../../../lib/validate'
 import UTIL from '../../../util/util.js'
 export default {
-  name: 'EsAddr',
+  name: 'EsTextarea',
   props: {
     isPop: {
       type: Boolean,
@@ -80,36 +53,12 @@ export default {
   data() {
     return {
       VALID_SET,
-      UTIL,
-      region: undefined
-      // regionOptions: regionData, // 1102 省市区 全部数据
-      // provinceAndCityOptions: provinceAndCityData, // 0714 省市 全部数据
-      // selectedRegionOptions: [], // 1102 省市区 选择数据
-      // selectedRegionData: {}, // 1102 省市区 选择数据
-      // regionConfig: {} // 0714 地址类
+      UTIL
     }
   },
   watch: {
-    // form: {
-    //   handler(val) {
-    //     // debugger
-    //     // this.region = undefined
-    //   },
-    //   deep: true,
-    //   immediate: true
-    // },
-    'item.value': {
-      handler(val){
-        if(val){
-          this.region = val.split(',')
-        }
-      },
-      immediate: true
-    },
     isPop: {
       handler(val) {
-        this.region = undefined
-        // console.log("item.value------------", this.item.value)
         this.initRule()
       },
       immediate: true
@@ -171,7 +120,7 @@ export default {
       _obj[_item.prop] = _rule
       this.$emit('assignRule', _obj)
     },
-    setRule(){
+    setRule() {
       let _item = this.item
       let _rule = []
       if (_item.validate) {
@@ -207,7 +156,8 @@ export default {
 
       let _form = this.form
       let _item = this.item
-      _form[_item.prop] = valType == 'text' ? regionText : valType == 'code' ? val.join(',') : JSON.stringify(val)
+      _form[_item.prop] =
+        valType == 'text' ? regionText : valType == 'code' ? val.join(',') : JSON.stringify(val)
       // debugger
       this.$emit('update:form', _form)
 
@@ -254,8 +204,9 @@ export default {
 </script>
 
 <style lang="less">
-.es-addr{
-  .form-item{
+.es-addr {
+  width: 100%;
+  .form-item {
     position: absolute;
   }
 }

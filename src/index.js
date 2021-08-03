@@ -6,7 +6,9 @@ import EsCropper from "../packages/cropper/index"
 import EsCrumb from "../packages/crumb/index"
 import EsDialog from "../packages/dialog/index"
 import EsDialogForm from "../packages/dialog-form/index"
+import EsEditForm from "../packages/edit-form/index"
 import EsForm from "../packages/form/index"
+import EsInfoForm from "../packages/info-form/index"
 import EsMenu from "../packages/menu/index"
 import EsImageGroup from "../packages/image-group/index"
 import EsQuery from "../packages/query/index"
@@ -26,7 +28,9 @@ const components = [
   EsCrumb,
   EsDialog,
   EsDialogForm,
+  EsEditForm,
   EsForm,
+  EsInfoForm,
   EsImageGroup,
   EsMenu,
   EsQuery,
@@ -58,7 +62,9 @@ export default {
   EsCrumb,
   EsDialog,
   EsDialogForm,
+  EsEditForm,
   EsForm,
+  EsInfoForm,
   EsImageGroup,
   EsMenu,
   EsQuery,
