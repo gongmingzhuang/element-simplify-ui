@@ -19,6 +19,15 @@
       :rules="rules"
     >
       <template v-for="(item, index) of formColumns">
+        <div
+          v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
+          class="type-tip"
+          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
+          :style="{width: '100%'}"
+        >
+          <span class="tip-title">{{item.label}}</span>
+          <span class="tip-tip">{{item.tip}}</span>
+        </div>
         <!-- [upg][20210622] 前置插槽，不推荐使用 -->
         <div
           class="prefix-slot"
@@ -64,7 +73,7 @@
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
-          v-else-if="item.type != 'image-group' && item.invisibleControl ? item.invisibleControl(item, form) : true"
+          v-if="item.type != 'image-group' && (item.type != 'tip' && item.type != 'title' && item.type != 'hidden') && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && (item.setting && item.setting.dynamicLabel ? item.setting.dynamicLabel(form, formColumns[index]) : item.label))"
@@ -681,6 +690,9 @@ export default {
 
           }
         }
+        if(item.type == 'slot' && item.hasOwnProperty('setting') && item.setting.hasOwnProperty('initDefaultValue')){
+          item.setting.initDefaultValue(this.form, item)
+        }
       })
     },
 
@@ -1013,6 +1025,14 @@ export default {
   // 单选框
   .el-radio-group {
     padding-top: 13px;
+  }
+  // 提示类型
+  .type-tip {
+    margin: 20px;
+    .tip-title {
+      font-weight: bold;
+      margin-right: 20px;
+    }
   }
 }
 </style>

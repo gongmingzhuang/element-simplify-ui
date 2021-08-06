@@ -95,7 +95,7 @@ export default {
         // 长期选择回显
         if (ed == '9999-12-31') {
           this.isDisabledEdDate = true
-          _item.setting.switch.select = true
+        //   _item.setting.switch.select = true
         }
         //
         if (st) {
@@ -190,7 +190,6 @@ export default {
     },
     // 长期
     handleSwitch(val, item) {
-      debugger
       let _form = this.form
       this.isSelected = val
       this.isDisabledEdDate = val

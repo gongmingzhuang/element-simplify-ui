@@ -22,6 +22,7 @@
         <div
           v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
           class="type-tip"
+          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :style="{width: '100%'}"
         >
           <span class="tip-title">{{item.label}}</span>

@@ -28,6 +28,7 @@
         v-if="type == 'preview' || filePath"
       >
         <el-button
+          v-if="setting.accept.length > 0"
           type="success"
           @click="handleOnPreview(filePath)"
         >查 看</el-button>
@@ -146,6 +147,10 @@ export default {
       let { accept, fileSize } = this.setting
       let { type, size } = file
       let transferAccept = [] // 格式转换数组
+      let acceptAllType = false // 允许上传所有格式
+      if(accept.length == 0){
+        acceptAllType = true
+      }
       accept.forEach((item) => {
         switch (item) {
           case 'jpg':
@@ -160,7 +165,7 @@ export default {
         }
       })
       // 文件类型判断
-      if (!transferAccept.includes(type)) {
+      if (!acceptAllType && !transferAccept.includes(type)) {
         Message.error('上传文件支持类型：' + accept.join('、'))
         return false
       }
