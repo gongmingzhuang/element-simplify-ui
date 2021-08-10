@@ -28,6 +28,14 @@
           <span class="tip-title">{{item.label}}</span>
           <span class="tip-tip">{{item.tip}}</span>
         </div>
+        <div
+          v-if="item.type=='line' && (!item.invisibleControl || item.invisibleControl(item, form))"
+          style="border-top: 1px solid #cacaca"
+          :style="{'border-top-style': item.borderStyle, 'width': '100%'}"
+          class="type-line"
+          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
+        >
+        </div>
         <!-- [upg][20210622] 前置插槽，不推荐使用 -->
         <div
           class="prefix-slot"
@@ -73,7 +81,7 @@
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
-          v-else-if="item.type != 'image-group'&& (item.type != 'tip' && item.type != 'title' && item.type != 'hidden')  && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
+          v-else-if="item.type != 'image-group'&& (item.type != 'line' && item.type != 'tip' && item.type != 'title' && item.type != 'hidden')  && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'line' && item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && (item.setting && item.setting.dynamicLabel ? item.setting.dynamicLabel(form, formColumns[index]) : item.label))"
@@ -535,7 +543,7 @@ export default {
       UTIL,
       hadInit: false, // 是否已经初始化
       canReinit: false,
-      form: {}, // 表单对象
+      form: {} // 表单对象
     }
   },
   // [upg][20210702] 动态监听columns
@@ -683,7 +691,7 @@ export default {
       //   this.$refs.form.clearValidate()
       //   this.$refs.form.resetFields()
 
-        this.initDefaultValue()
+      this.initDefaultValue()
       // })
     },
     initRules() {},
