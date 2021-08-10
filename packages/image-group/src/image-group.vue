@@ -37,6 +37,7 @@
           :form="form"
           :item="itm"
           :headers="item.setting.headers"
+          :data="item.setting && item.setting.data ? item.setting.data : {}"
           :action="item.setting.action"
           :accept="item.setting.accept"
           :file-size="item.setting.fileSize"

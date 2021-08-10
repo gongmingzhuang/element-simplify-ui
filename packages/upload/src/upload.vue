@@ -9,6 +9,7 @@
         :list-type="listType"
         :action="action"
         :headers="headers"
+        :data="data"
         :before-upload="typeof(beforeUpload)=='function' ? beforeUpload: handleBeforeUpload"
         :on-success="handleOnSuccess"
         :on-error="handleOnError"
@@ -86,6 +87,11 @@ export default {
     },
     // 请求头
     headers: {
+      type: Object,
+      default: ()=>{return{}}
+    },
+    // 额外参数
+    data: {
       type: Object,
       default: ()=>{return{}}
     },

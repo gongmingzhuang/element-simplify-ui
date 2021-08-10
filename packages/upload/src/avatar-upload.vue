@@ -33,6 +33,7 @@
         :action="action"
         :show-file-list="false"
         :headers="headers"
+        :data="data"
         :before-upload="file => manipulateBeforeUpload(file, item, form)"
         :on-success="(response,file,fileList) => mainpulateOnSuccess(response, file, item, form)"
       >
@@ -72,6 +73,10 @@ export default {
       default: () => {
         return {}
       }
+    },
+    data: {
+      type: Object,
+      dafault: ()=>{return{}}
     },
     accept: {
       type: Array,

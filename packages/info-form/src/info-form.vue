@@ -342,6 +342,7 @@
               <es-upload
                 :type="item.type"
                 :headers="item.setting && item.setting.headers"
+                :data="item.setting && item.setting.data ? item.setting.data : {}"
                 :action="item.setting.action || '/'"
                 :file-path="form[item.prop]"
                 :setting="item.setting"
