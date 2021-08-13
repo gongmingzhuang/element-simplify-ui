@@ -7,3 +7,10 @@
   .w-100{
     width: 100%;
   }
+
+  .font-color-red, .font-color-danger, .c-danger{
+    color: red;
+  }
+  .font-color-orange, .font-color-warn, .c-warn{
+    color: orange;
+  }

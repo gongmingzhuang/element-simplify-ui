@@ -90,6 +90,9 @@
           :prop="item.prop"
         >
           <div class="es-form-item">
+            <template v-if="item.type == 'empty'">
+              <div></div>
+            </template>
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <!-- [crt][20210709] 金额格式化 -->
@@ -341,6 +344,9 @@
                 @on-success="res => handleOnSuccess(res,item, item.setting)"
                 @on-reset="res=>handleOnReset(res,item, item.setting)"
               />
+              <template v-if="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('tip') && item.setting.tip">
+                <span class="font-color-orange">{{item.setting.tip}}</span>
+              </template>
             </template>
             <!-- [crt][20210621] 兼容额外字段 -->
             <template v-if="item.type=='slot'">

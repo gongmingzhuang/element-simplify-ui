@@ -1,9 +1,15 @@
 <template>
-  <div class="es-form">
-    <!-- >>> {{formColumns}} -->
-    <!-- {{form.avatar1}} -->
+  <div class="es-form-ex">
+    <div v-show="1">
+      form: {{form}}
+      <hr>
+    </div>
     <div v-show="0">
-      {{form}}
+      rules: {{rules}}
+      <hr>
+    </div>
+    <div v-show="0">
+      {{formData}}
       <hr>
     </div>
 
@@ -19,44 +25,69 @@
       :rules="rules"
     >
       <template v-for="(item, index) of formColumns">
-        <div
-          v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
-          class="type-tip"
-          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
-          :style="{width: '100%'}"
-        >
-          <span class="tip-title">{{item.label}}</span>
-          <span class="tip-tip">{{item.tip}}</span>
-        </div>
-        <div
-          v-if="item.type=='line' && (!item.invisibleControl || item.invisibleControl(item, form))"
-          style="border-top: 1px solid #cacaca"
-          :style="{'border-top-style': item.borderStyle, 'width': '100%'}"
-          class="type-line"
-          :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
-        >
-        </div>
         <!-- [upg][20210622] 前置插槽，不推荐使用 -->
-        <div
-          class="prefix-slot"
+        <!-- <prefix-slot
+          :key="index"
           v-if="item.prefix"
-        >
-          <slot
-            :name="`${item.prop}-prefix`"
-            :form="form"
-            :item="item"
-          />
-        </div>
+          :name="item.prop"
+          :form="form"
+          :item="item"
+        /> -->
+        <!-- [upg][20210524] 提示语 -->
+        <tip-item
+          :key="index"
+          v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
+          :item="item"
+        />
         <!-- [upg][20210524] 标题 -->
-        <!-- [upg][20210705] 标题显示隐藏控制 -->
-        <template v-if="item.type=='title' && (!item.invisibleControl || item.invisibleControl(item, form))">
-          <p
-            class="form-header"
-            :key="index"
-          >{{item.label}}</p>
-        </template>
+        <title-item
+          :key="index"
+          v-if="item.type=='title' && (!item.invisibleControl || item.invisibleControl(item, form))"
+          :item="item"
+        />
         <!-- [upg][20210706]: 隐藏域字段-->
-        <el-form-item
+        <hide-item
+          :key="index"
+          v-if="item.type=='hidden'"
+          :form="form"
+          :item="item"
+        />
+        <!-- [crt][20210701] 文本展示 -->
+        <txt-item
+          :key="index"
+          v-if="item.type=='txt' && formData[item.prop]"
+          :form-setting="formSetting"
+          :form="formData"
+          :item="item"
+        />
+        <!-- [crt][20210701] 文本域 -->
+        <text-item
+          v-if="(item.type=='text' || !item.type)"
+          :key="index + item.prop"
+          v-bind="{...$props}"
+          :form.sync="form"
+          :rule.sync="rules[item.prop]"
+          :item="item"
+        />
+        <!-- [crt][20210701] 密码域 -->
+        <password-item
+          v-if="item.type=='password'"
+          :key="index + item.prop"
+          v-bind="{...$props}"
+          :form.sync="form"
+          :rule.sync="rules[item.prop]"
+          :item="item"
+        />
+        <!-- [crt][20210701] 日期域 -->
+        <date-item
+          v-if="item.type=='date'"
+          :key="index + item.prop"
+          v-bind="{...$props}"
+          :form.sync="form"
+          :rule.sync="rules[item.prop]"
+          :item="item"
+        />
+        <!-- <el-form-item
           v-else-if="item.type=='hidden'"
           class="hidden"
         >
@@ -65,7 +96,7 @@
             type="hidden"
             :readonly="true"
           />
-        </el-form-item>
+        </el-form-item> -->
         <!-- [upg][20210524] 支持分列表单 -->
         <!-- :style="{width: `calc(100% - ${formSetting.col}) / ${ formSetting.col || 1})`}" -->
         <!-- [upg][20210630]: invisibleControl - 新增可控制显示/隐藏表单操作 -->
@@ -81,7 +112,7 @@
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
-          v-else-if="item.type != 'image-group'&& (item.type != 'line' && item.type != 'tip' && item.type != 'title' && item.type != 'hidden')  && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'line' && item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
+          v-if=" 0 && item.type != 'image-group' && (item.type != 'line' &&  item.type != 'tip' && item.type != 'title' && item.type != 'hidden') && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'line' &&  item.type != 'tip' && item.type != 'title' && item.type != 'hidden') ? true : false"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :label="!labelWidth ? '' : (showLabel && (item.setting && item.setting.dynamicLabel ? item.setting.dynamicLabel(form, formColumns[index]) : item.label))"
@@ -90,13 +121,10 @@
           :prop="item.prop"
         >
           <div class="es-form-item">
-            <template v-if="item.type == 'empty'">
-              <div></div>
-            </template>
             <!-- [crt][20210701] 文本展示 -->
-            <template v-if="item.type=='txt'">
+            <!-- <template v-if="item.type=='txt_1'"> -->
               <!-- [crt][20210709] 金额格式化 -->
-              <template v-if="item.setting && item.setting.dataType=='money'">
+              <!-- <template v-if="item.setting && item.setting.dataType=='money'">
                 <span>{{(form[item.prop] && UTIL.moneyFormat(form[item.prop])) || (UTIL.moneyFormat(0)) }}</span>
               </template>
               <template v-else-if="item.render">
@@ -105,29 +133,29 @@
               <template v-else>
                 <span>{{form[item.prop] || '-'}}</span>
               </template>
-            </template>
+            </template> -->
             <!-- [crt][20210715] 远程查询模糊输入 -->
-            <template v-if="item.type=='remote'">
+            <!-- <template v-if="item.type=='remote'">
               <el-autocomplete
                 v-model="form[item.prop]"
                 :fetch-suggestions="item.fetchEvent"
                 :placeholder="'请输入'+item.label"
                 @select="item.selectEvent ? item.selectEvent : ()=>{}"
               ></el-autocomplete>
-            </template>
+            </template> -->
             <!-- [crt][20210706] 隐藏域 -->
-            <template v-if="item.type=='hidden'">
+            <!-- <template v-if="item.type=='hidden'">
               <el-input
                 v-model.trim="form[item.prop]"
                 type="hidden"
                 :readonly="true"
               ></el-input>
-            </template>
+            </template> -->
             <!-- 输入框 -->
             <!-- [crt][20210714] 统一社会信用代码类型 -->
             <!-- [crt][20210714] 名称类型 -->
             <!-- [crt][20210715] 前置icon -->
-            <template v-if="item.type=='text' || !item.type || item.type == 'creditCode' || item.type == 'name' || item.type == 'mobile' || item.type == 'IDCard' || item.type == 'email'">
+            <!-- <template v-if="item.type=='text' || !item.type || item.type == 'creditCode' || item.type == 'name' || item.type == 'mobile' || item.type == 'IDCard' || item.type == 'email'">
               <el-input
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 v-model.trim="form[item.prop]"
@@ -136,9 +164,9 @@
                 :clearable="item.setting && item.setting.clearable"
                 :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               ></el-input>
-            </template>
+            </template> -->
             <!-- [crt][20210621] 密码框 -->
-            <template v-if="item.type=='password'">
+            <!-- <template v-if="item.type=='password'">
               <el-input
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 :type="passwordConfig[item.prop].show ? 'text': 'password'"
@@ -153,9 +181,8 @@
                   slot="suffix"
                   @click="passwordConfig[item.prop].show = !passwordConfig[item.prop].show"
                 />
-                <!-- @mouseout="passwordConfig[item.prop].show = false" -->
               </el-input>
-            </template>
+            </template> -->
             <!-- 文本域 -->
             <template v-if="item.type=='textarea'">
               <es-textarea
@@ -299,6 +326,7 @@
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                :picker-options="item.setting && item.setting.pickerOptions"
                 type="date"
               />
             </template>
@@ -308,6 +336,7 @@
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                :picker-options="item.setting && item.setting.pickerOptions"
                 type="daterange"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -316,33 +345,12 @@
             </template>
             <!-- [20210714] 日期切换框 -->
             <template v-if="item.type === 'dateRangeSwitch'">
-              <div class="p-rel d-flex w-100">
-                <el-date-picker
-                  v-show="item.setting && !item.setting.switch"
-                  @change="date => {dateFormatting(date, item)}"
-                  v-model="form[item.prop]"
-                  :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期"
-                ></el-date-picker>
-                <el-date-picker
-                  v-show="item.setting && item.setting.switch"
-                  @change="date => {dateFormatting(date, item)}"
-                  v-model="form[item.props[0]]"
-                  :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                  type="date"
-                  placeholder="选择日期"
-                ></el-date-picker>
-                <!-- <el-checkbox
-                  v-if="item.setting && (!item.setting.disabled && !item.setting.readonly)"
-                  class="ml-10"
-                  v-model="item.setting.switch"
-                  @change="val => {switchDateType(val, item)}"
-                >长期</el-checkbox> -->
-                <!-- @change="val => { item.setting.switch = !val }" -->
-              </div>
+              <es-date-range-switch
+                :columns="formColumns"
+                :item="item"
+                :form.sync="form"
+                :rules="rules"
+              ></es-date-range-switch>
             </template>
             <!-- 文件上传框 -->
             <template v-if="item.type=='file' || item.type=='preview'">
@@ -363,9 +371,6 @@
                 @on-success="res => handleOnSuccess(res,item, item.setting)"
                 @on-reset="res=>handleOnReset(res,item, item.setting)"
               />
-              <template v-if="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('tip') && item.setting.tip">
-                <span class="font-color-orange">{{item.setting.tip}}</span>
-              </template>
             </template>
             <!-- [crt][20210621] 兼容额外字段 -->
             <template v-if="item.type=='slot'">
@@ -398,38 +403,6 @@
             :form="form"
             :rules="rules"
           ></es-image-group>
-          <div
-            v-if="0"
-            class="image-group d-flex flex-wrap w-100"
-            :class="item.prop"
-          >
-            <template v-for="(imgItem, imgIndex) in item.group">
-              <el-form-item
-                v-if="(!imgItem.invisibleControl || imgItem.invisibleControl(imgItem, form))"
-                class="d-flex"
-                :label="imgItem.label"
-                :key="imgIndex"
-                :prop="imgItem.prop"
-              >
-                <el-input
-                  v-model="form[imgItem.prop]"
-                  v-show="0"
-                />
-                <es-upload
-                  :headers="item.setting.headers"
-                  :action="item.setting.action || '#'"
-                  :list-type="'picture-card'"
-                  :file-path="form[imgItem.prop]"
-                  :setting="item.setting"
-                  :reset-button="item.setting.resetButton"
-                  :pdf-preview="item.setting.onPdfPreview"
-                  :before-upload="item.setting.beforeUpload"
-                  @on-success="res => handleOnSuccess(res,imgItem, item.setting)"
-                  @on-reset="res=>handleOnReset(res,imgItem, item.setting)"
-                />
-              </el-form-item>
-            </template>
-          </div>
         </template>
       </template>
     </el-form>
@@ -465,20 +438,57 @@
  */
 import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
+import EsDateRangeSwitch from '../../form/src/date-range-switch'
 import EsImageGroup from '../../image-group/src/image-group'
 import EsTextarea from '../../form/src/textarea'
 import EsUpload from '../../upload/src/upload'
 import VALID_SET from '../../../lib/validate'
 import UTIL from '../../../util/util.js'
+
+import DateItem from './date-item'
+import HideItem from './hide-item'
+import PasswordItem from './password-item'
+import PrefixSlot from './prefix-slot'
+import TextItem from './text-item'
+import TipItem from './tip-item'
+import TitleItem from './title-item'
+import TxtItem from './txt-item'
+
+// 省市区联动数据
+import {
+  provinceAndCityData,
+  regionData,
+  provinceAndCityDataPlus,
+  regionDataPlus,
+  CodeToText,
+  TextToCode
+} from 'element-china-area-data'
 export default {
-  name: 'EsInfoForm',
+  name: 'EsFormEx',
   components: {
     EsButtonGroup,
+    EsDateRangeSwitch,
     EsImageGroup,
     EsTextarea,
-    EsUpload
+    EsUpload,
+
+    DateItem,
+    HideItem,
+    PasswordItem,
+    PrefixSlot,
+    TextItem,
+    TipItem,
+    TitleItem,
+    TxtItem
   },
   props: {
+    isPop: {
+      type: Boolean,
+      default: false
+    },
+    formData: {
+      type: Object
+    },
     // 显示label
     showLabel: {
       type: Boolean,
@@ -549,11 +559,25 @@ export default {
       UTIL,
       hadInit: false, // 是否已经初始化
       canReinit: false,
-      form: {} // 表单对象
+      form: {}, // 表单对象
+      regionOptions: regionData, // 1102 省市区 全部数据
+      provinceAndCityOptions: provinceAndCityData, // 0714 省市 全部数据
+      selectedRegionOptions: [], // 1102 省市区 选择数据
+      selectedRegionData: {}, // 1102 省市区 选择数据
+      passwordConfig: {}, // 0621 密码类型显示/隐藏控制
+      codeConfig: {}, // 0621 验证码类图片
+      messageConfig: {}, // 0629 短信验证码类
+      regionConfig: {} // 0714 地址类
     }
   },
   // [upg][20210702] 动态监听columns
   watch: {
+    formData: {
+      handler: function (_formData) {
+        Object.assign(this.form, _formData)
+      },
+      imemediate: true
+    },
     formColumns: {
       handler: function (newColumns) {
         this.initForm()
@@ -635,7 +659,7 @@ export default {
               })
           }
 
-          if (item.validate) {
+          if (0 && item.validate) {
             if (!this.rules.hasOwnProperty(item.prop)) {
               this.$set(this.rules, item.prop, [])
               item.validate.forEach(itm => {
@@ -685,7 +709,7 @@ export default {
                     }
                   })
                 }
-                this.rules[item.prop].push(_valid)
+                // this.rules[item.prop].push(_valid)
               })
             }
           }
@@ -693,17 +717,17 @@ export default {
       })
       // [20210629][crt] 移除校验规则/清空表单
       // [crt][20210707] value = 0 赋值
-      // this.$nextTick(() => {
-      //   this.$refs.form.clearValidate()
-      //   this.$refs.form.resetFields()
+      this.$nextTick(() => {
+        // this.$refs.form.clearValidate()
+        // this.$refs.form.resetFields()
 
-      this.initDefaultValue()
-      // })
+        // this.initDefaultValue()
+      })
     },
     initRules() {},
     initDefaultValue() {
       // 设置默认值
-      this.formColumns.forEach(item => {
+      0 && this.formColumns.forEach(item => {
         if (item.value || item.value === 0) {
           if (item.value === 0) {
             this.$set(this.form, item.prop, item.value + '')
@@ -728,6 +752,20 @@ export default {
           item.group.forEach(imgItem => {
             this.$set(this.form, imgItem.prop, imgItem.value || '')
           })
+        }
+        if (item.type == 'dateRangeSwitch') {
+          if (item.value && item.value instanceof Array && item.value.length == 2) {
+            let _props = item.props
+            this.$set(this.form, _props[0], item.value[0])
+            this.$set(this.form, _props[1], item.value[1])
+          }
+        }
+        if (
+          item.type == 'slot' &&
+          item.hasOwnProperty('setting') &&
+          item.setting.hasOwnProperty('initDefaultValue')
+        ) {
+          item.setting.initDefaultValue(this.form, item)
         }
       })
     },
@@ -902,7 +940,7 @@ export default {
 }
 </script>
 <style lang="less">
-.es-form {
+.es-form-ex {
   padding: 10px;
   background: #fff;
   border-radius: 5px;
@@ -922,7 +960,7 @@ export default {
     margin-left: 10px;
   }
 }
-.es-form .el-form {
+.es-form-ex .el-form {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -944,50 +982,42 @@ export default {
 .el-form-item.item-wrap > div {
   margin-left: 0 !important;
 }
-.es-form .el-select,
-.es-form .el-cascader {
+.es-form-ex .el-select,
+.es-form-ex .el-cascader {
   width: 100%;
 }
 
-/* type=title */
-.form-header {
-  width: 100%;
-  margin: 10px;
-  margin-top: 15px;
-  font-size: 16px;
-  font-weight: bold;
-}
-.es-form .es-button-group {
+.es-form-ex .es-button-group {
   justify-content: flex-end;
 }
-.es-form .el-date-editor--daterange.el-input,
-.es-form .el-date-editor--daterange.el-input__inner,
-.es-form .el-date-editor--timerange.el-input,
-.es-form .el-date-editor--timerange.el-input__inner,
-.es-form .el-autocomplete {
+.es-form-ex .el-date-editor--daterange.el-input,
+.es-form-ex .el-date-editor--daterange.el-input__inner,
+.es-form-ex .el-date-editor--timerange.el-input,
+.es-form-ex .el-date-editor--timerange.el-input__inner,
+.es-form-ex .el-autocomplete {
   width: 100%;
 }
 
-.es-form .es-form-item {
+.es-form-ex .es-form-item {
   display: flex;
 }
-.es-form .el-form-item.hidden {
+.es-form-ex .el-form-item.hidden {
   display: none;
 }
-.es-form .es-form-item .suffix-slot {
+.es-form-ex .es-form-item .suffix-slot {
   margin-left: 8px;
 }
 
-.es-form .code {
+.es-form-ex .code {
   position: relative;
   display: flex;
   width: 100%;
 }
-.es-form .code .code-left {
+.es-form-ex .code .code-left {
   // width: calc(100% - 120px);
   width: 100%;
 }
-.es-form .code .code-right {
+.es-form-ex .code .code-right {
   position: absolute;
   right: 3px;
   top: 4px;
@@ -997,47 +1027,47 @@ export default {
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
-.es-form .code img {
+.es-form-ex .code img {
   float: right;
   height: 100%;
 }
-.es-form i.el-icon-view {
+.es-form-ex i.el-icon-view {
   margin-right: 5px;
   line-height: 40px;
 }
-.es-form i.el-icon-view:hover {
+.es-form-ex i.el-icon-view:hover {
   color: #666;
 }
 
-.es-form .message {
+.es-form-ex .message {
   display: flex;
   justify-content: space-between;
   width: 100%;
 }
-.es-form .message .message-left {
+.es-form-ex .message .message-left {
   width: calc(100% - 168px);
 }
-.es-form .message .message-right {
+.es-form-ex .message .message-right {
   width: 168px;
   text-align: right;
   color: #666;
 }
-.es-form .message .message-right > span {
+.es-form-ex .message .message-right > span {
   margin-right: 10px;
 }
-.es-form .el-button--text {
+.es-form-ex .el-button--text {
   border: 0;
 }
 
-.es-form .address {
+.es-form-ex .address {
   width: 100%;
 }
-.es-form .address .el-textarea {
+.es-form-ex .address .el-textarea {
   margin-top: 5px;
   font-size: 12px;
 }
 
-.es-form {
+.es-form-ex {
   // 日期控件布局样式
   .el-date-editor {
     display: flex;
@@ -1061,6 +1091,14 @@ export default {
   // 单选框
   .el-radio-group {
     padding-top: 13px;
+  }
+  // 提示类型
+  .type-tip {
+    margin: 20px;
+    .tip-title {
+      font-weight: bold;
+      margin-right: 20px;
+    }
   }
 }
 </style>

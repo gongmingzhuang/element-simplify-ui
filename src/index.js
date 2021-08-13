@@ -8,6 +8,7 @@ import EsDialog from "../packages/dialog/index"
 import EsDialogForm from "../packages/dialog-form/index"
 import EsEditForm from "../packages/edit-form/index"
 import EsForm from "../packages/form/index"
+import EsFormEx from "../packages/form-ex/index"
 import EsInfoForm from "../packages/info-form/index"
 import EsMenu from "../packages/menu/index"
 import EsImageGroup from "../packages/image-group/index"
@@ -30,6 +31,7 @@ const components = [
   EsDialogForm,
   EsEditForm,
   EsForm,
+  EsFormEx,
   EsInfoForm,
   EsImageGroup,
   EsMenu,
@@ -64,6 +66,7 @@ export default {
   EsDialogForm,
   EsEditForm,
   EsForm,
+  EsFormEx,
   EsInfoForm,
   EsImageGroup,
   EsMenu,

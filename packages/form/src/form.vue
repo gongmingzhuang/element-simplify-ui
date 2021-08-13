@@ -82,6 +82,7 @@
         <!-- [upg][20210714] 新增 remoteText，远程模糊查询输入 -->
         <!-- :label="!labelWidth ? '' : (showLabel && item.label)" -->
         <el-form-item
+          :ref="item.prop"
           v-if="item.type != 'image-group' && (item.type != 'line' && item.type != 'tip' &&  item.type != 'title' && item.type != 'hidden') && item.invisibleControl ? item.invisibleControl(item, form) : (item.type != 'line' && item.type != 'tip' &&  item.type != 'title' && item.type != 'hidden') ? true : false"
           :style="{width: (item.setting && item.setting.isWholeLine) ? '100%' : formSetting.itemWidth ? formSetting.itemWidth : `calc((100% / ${formSetting.col || 1 })`}"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
@@ -91,6 +92,9 @@
           :prop="item.prop"
         >
           <div class="es-form-item">
+            <template v-if="item.type=='empty'">
+              <div></div>
+            </template>
             <!-- [crt][20210701] 文本展示 -->
             <template v-if="item.type=='txt'">
               <!-- [crt][20210709] 金额格式化 -->
@@ -326,6 +330,9 @@
                 @on-success="res => handleOnSuccess(res,item, item.setting)"
                 @on-reset="res=>handleOnReset(res,item, item.setting)"
               />
+              <template v-if="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('tip') && item.setting.tip">
+                <span class="font-color-orange">{{item.setting.tip}}</span>
+              </template>
             </template>
             <!-- [crt][20210621] 兼容额外字段 -->
             <template v-if="item.type=='slot'">
