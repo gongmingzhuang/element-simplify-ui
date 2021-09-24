@@ -20,6 +20,13 @@
     >
       <template v-for="(item, index) of formColumns">
         <div
+          v-if="item.type == 'divider'  && (!item.invisibleControl || item.invisibleControl(item, form))"
+          class="divider"
+          :style="{width: '100%'}"
+        >
+          <el-divider />
+        </div>
+        <div
           v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
           class="type-tip"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
@@ -706,7 +713,7 @@ export default {
       this.formColumns.forEach(item => {
         if (item.value || item.value === 0) {
           if (item.value === 0) {
-            this.$set(this.form, item.prop, item.value + '')
+            this.$set(this.form, item.prop, item.value)
           } else {
             this.$set(this.form, item.prop, item.value)
           }

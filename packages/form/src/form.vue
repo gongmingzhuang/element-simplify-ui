@@ -19,7 +19,14 @@
       :rules="rules"
     >
       <template v-for="(item, index) of formColumns">
-
+        <!--  -->
+        <div
+          v-if="item.type == 'divider'  && (!item.invisibleControl || item.invisibleControl(item, form))"
+          class="divider"
+          :style="{width: '100%'}"
+        >
+          <el-divider />
+        </div>
         <div
           v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
           class="type-tip"
@@ -133,6 +140,8 @@
               <el-input
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 v-model.trim="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
                 :clearable="item.setting && item.setting.clearable"
@@ -145,6 +154,8 @@
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 :type="passwordConfig[item.prop].show ? 'text': 'password'"
                 v-model.trim="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
                 :clearable="item.setting && item.setting.clearable"
@@ -174,6 +185,8 @@
                   <el-input
                     :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
+                    v-bind="{...item.setting}"
+                    v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
@@ -196,6 +209,8 @@
                   <el-input
                     :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
+                    v-bind="{...item.setting}"
+                    v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
@@ -217,6 +232,8 @@
             <template v-if="item.type=='checkbox'">
               <el-checkbox-group
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 @change="val => item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
               >
                 <template v-for="(itm,idx) in item.translate">
@@ -239,7 +256,12 @@
             </template>
             <!-- 单选框 -->
             <template v-if="item.type=='radio'">
-              <el-radio-group v-model="form[item.prop]">
+              <el-radio-group
+                v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
+                @change="(val) => item.hasOwnProperty('changeEvent') ? item.changeEvent(val, item, form) : item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
+              >
                 <template v-for="(itm,idx) in item.translate">
                   <el-radio
                     :key="index+'_'+itm.value"
@@ -253,6 +275,8 @@
             <template v-if="item.type=='select'">
               <el-select
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请选择'"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 @change="(val) => item.hasOwnProperty('changeEvent') ? item.changeEvent(val, item, form) : item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
@@ -284,6 +308,8 @@
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 :picker-options="item.setting && item.setting.pickerOptions"
                 type="date"
@@ -294,8 +320,24 @@
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 type="daterange"
+                :picker-options="item.setting && item.setting.pickerOptions"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              />
+            </template>
+            <template v-if="item.type=='datetimerange'">
+              <el-date-picker
+                @change="date => {dateFormatting(date, item)}"
+                v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
+                :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                type="datetimerange"
                 :picker-options="item.setting && item.setting.pickerOptions"
                 range-separator="至"
                 start-placeholder="开始日期"
@@ -330,9 +372,31 @@
                 @on-success="res => handleOnSuccess(res,item, item.setting)"
                 @on-reset="res=>handleOnReset(res,item, item.setting)"
               />
+              <slot
+                :name="`before`"
+                :form="form"
+                :item="item"
+              />
               <template v-if="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('tip') && item.setting.tip">
                 <span class="font-color-orange">{{item.setting.tip}}</span>
               </template>
+              <slot
+                :name="`after`"
+                :form="form"
+                :item="item"
+              />
+            </template>
+            <template v-if="item.type === 'avatarPreview'">
+              <el-input
+                v-show="0"
+                v-model="form[item.prop]"
+                :readonly="true"
+              />
+              <es-avatar-upload
+                ref="es-avatar-upload"
+                :form="form"
+                :item="item"
+              />
             </template>
             <!-- [crt][20210621] 兼容额外字段 -->
             <template v-if="item.type=='slot'">
@@ -402,6 +466,7 @@ import { Form } from 'element-ui'
 import EsButtonGroup from '../../button-group/src/button-group'
 import EsImageGroup from '../../image-group/src/image-group'
 import EsAddr from './addr'
+import EsAvatarUpload from '../../upload/src/avatar-upload.vue'
 import EsDateRangeSwitch from './date-range-switch'
 import EsTextarea from './textarea'
 import EsUpload from '../../upload/src/upload'
@@ -420,6 +485,7 @@ export default {
   name: 'EsForm',
   components: {
     EsAddr,
+    EsAvatarUpload,
     EsDateRangeSwitch,
     EsTextarea,
     EsButtonGroup,
@@ -704,8 +770,12 @@ export default {
         (item.setting.hasOwnProperty('switch') && !item.setting.switch)
       ) {
         this.form[item.props[0]] = this.$moment(date[0]).format(_valueFormat)
-        this.form[item.props[1]] =
-          this.$moment(date[1]).format(_valueFormat).split(' ')[0] + ' 23:59:59'
+        if (item.type != 'datetimerange') {
+          this.form[item.props[1]] =
+            this.$moment(date[1]).format(_valueFormat).split(' ')[0] + ' 23:59:59'
+        }else{
+          this.form[item.props[1]] = this.$moment(date[1]).format(_valueFormat)
+        }
       }
       // [20210714] dateRangeSwitch 增强
       // dateRangeSwitch[switch: TRUE]

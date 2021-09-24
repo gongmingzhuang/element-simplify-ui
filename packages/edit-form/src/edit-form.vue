@@ -20,12 +20,19 @@
     >
       <template v-for="(item, index) of formColumns">
         <div
+          v-if="item.type == 'divider'  && (!item.invisibleControl || item.invisibleControl(item, form))"
+          class="divider"
+          :style="{width: '100%'}"
+        >
+          <el-divider />
+        </div>
+        <div
           v-if="item.type=='tip' && (!item.invisibleControl || item.invisibleControl(item, form))"
           class="type-tip"
           :class="item.setting && item.setting.styleClass ? item.setting.styleClass : ''"
           :style="{width: '100%'}"
         >
-          <span class="tip-title">{{item.label}}</span>
+          <span class="tip-title">----{{item.label}}</span>
           <span class="tip-tip">{{item.tip}}</span>
         </div>
         <div
@@ -131,6 +138,8 @@
               <el-input
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 v-model.trim="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
                 :clearable="item.setting && item.setting.clearable"
@@ -143,6 +152,8 @@
                 :prefix-icon="item.setting && item.setting.prefixIcon"
                 :type="passwordConfig[item.prop].show ? 'text': 'password'"
                 v-model.trim="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
                 :clearable="item.setting && item.setting.clearable"
@@ -172,6 +183,8 @@
                   <el-input
                     :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
+                    v-bind="{...item.setting}"
+                    v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
@@ -194,6 +207,8 @@
                   <el-input
                     :prefix-icon="item.setting && item.setting.prefixIcon"
                     v-model.trim="form[item.prop]"
+                    v-bind="{...item.setting}"
+                    v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
@@ -215,6 +230,8 @@
             <template v-if="item.type=='checkbox'">
               <el-checkbox-group
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 @change="val => item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
               >
                 <template v-for="(itm,idx) in item.translate">
@@ -237,7 +254,11 @@
             </template>
             <!-- 单选框 -->
             <template v-if="item.type=='radio'">
-              <el-radio-group v-model="form[item.prop]">
+              <el-radio-group
+                v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
+              >
                 <template v-for="(itm,idx) in item.translate">
                   <el-radio
                     :key="index+'_'+itm.value"
@@ -251,15 +272,40 @@
             <template v-if="item.type=='select'">
               <el-select
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请选择'"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
-                @change="(val) => item.hasOwnProperty('changeEvent') ? item.changeEvent(val, item, form) : item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
+                @remove-tag="(val) => item.hasOwnProperty('setting') 
+                  && item.setting.hasOwnProperty('multiple') 
+                  && item.setting.multiple
+                  && item.setting.hasOwnProperty('removeTagEvent') 
+                  && item.setting.removeTagEvent(val, item, form)"
+                @change="(val) => item.hasOwnProperty('changeEvent') 
+                  ? item.changeEvent(val, item, form) 
+                  : item.hasOwnProperty('setting') 
+                  && item.setting.hasOwnProperty('changeEvent') 
+                  && item.setting.changeEvent(val, item, form)"
               >
                 <el-option
                   v-for="itm in item.translate"
                   :key="itm.value"
                   :label="itm.label"
                   :value="itm.value"
+                  :disabled="item.hasOwnProperty('setting') 
+                  && item.setting.hasOwnProperty('multiple') 
+                  && item.setting.multiple
+                    && item.setting.hasOwnProperty('optionDisabled') 
+                    && ( typeof(item.setting.optionDisabled) == 'function' 
+                      ? item.setting.optionDisabled(itm, item, form) 
+                      : item.setting.optionDisabled)"
+                  :class="item.hasOwnProperty('setting') 
+                  && item.setting.hasOwnProperty('multiple') 
+                  && item.setting.multiple
+                    && item.setting.hasOwnProperty('optionStyleClass') 
+                    && (typeof(item.setting.optionStyleClass) == 'function' 
+                      ? item.setting.optionStyleClass(itm, item, form) 
+                      : item.setting.optionStyleClass)"
                 >
                 </el-option>
               </el-select>
@@ -298,6 +344,8 @@
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 :picker-options="item.setting && item.setting.pickerOptions"
                 type="date"
@@ -308,6 +356,8 @@
               <el-date-picker
                 @change="date => {dateFormatting(date, item)}"
                 v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 :picker-options="item.setting && item.setting.pickerOptions"
                 type="daterange"
@@ -674,7 +724,7 @@ export default {
       this.formColumns.forEach(item => {
         if (item.value || item.value === 0) {
           if (item.value === 0) {
-            this.$set(this.form, item.prop, item.value + '')
+            this.$set(this.form, item.prop, item.value)
           } else {
             this.$set(this.form, item.prop, item.value)
           }

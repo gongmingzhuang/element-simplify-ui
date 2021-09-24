@@ -6,7 +6,7 @@
       <hr>
     </div>
     <div v-show="0">
-      {{item}}
+      {{item.setting.previewUrl}}
       <hr>
     </div>
     <!-- 预览控件 -->
@@ -76,7 +76,9 @@ export default {
     },
     data: {
       type: Object,
-      dafault: ()=>{return{}}
+      dafault: () => {
+        return {}
+      }
     },
     accept: {
       type: Array,
@@ -161,6 +163,8 @@ export default {
       // 内置校验，可配置accept/fileSize
       let accept = this.accept
       let fileSize = this.fileSize
+      // [20210923] 类型映射
+      let typeMapping = item?.setting?.typeMapping
       let { type, size } = file
       let transferAccept = [] // 格式转换数组
       accept.forEach(item => {
@@ -176,6 +180,15 @@ export default {
           //   break
         }
       })
+
+      if (typeMapping && typeMapping instanceof Object && !(typeMapping instanceof Array)) {
+        for (let key in typeMapping) {
+          transferAccept.push(typeMapping[key])
+        }
+      }
+      if (typeMapping && typeMapping instanceof Array) {
+        transferAccept = transferAccept.concat(typeMapping)
+      }
       // 文件类型判断
       if (!transferAccept.includes(type)) {
         Message.error('上传文件支持类型：' + accept.join('、'))
@@ -206,7 +219,7 @@ export default {
 <style lang="less">
 .avatar-uploader {
   line-height: normal;
-  &.preview-container{
+  &.preview-container {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
     cursor: pointer;

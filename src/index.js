@@ -1,5 +1,6 @@
 
 import EsAside from "../packages/aside/index"
+import EsAvatarUpload from "../packages/upload/avatar-upload"
 import EsButton from "../packages/button/index"
 import EsButtonGroup from "../packages/button-group/index"
 import EsCropper from "../packages/cropper/index"
@@ -23,6 +24,7 @@ import Moment from 'moment'
 
 const components = [
   EsAside,
+  EsAvatarUpload,
   EsButton,
   EsButtonGroup,
   EsCropper,
@@ -59,6 +61,7 @@ const install = Vue => {
 export default {
   install,
   EsAside,
+  EsAvatarUpload,
   EsButton,
   EsButtonGroup,
   EsCrumb,

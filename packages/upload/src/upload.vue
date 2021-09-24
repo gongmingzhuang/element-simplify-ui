@@ -156,6 +156,7 @@ export default {
       let acceptAllType = false // 允许上传所有格式
       if(accept.length == 0){
         acceptAllType = true
+        
       }
       accept.forEach((item) => {
         switch (item) {
@@ -180,19 +181,19 @@ export default {
         Message.error('上传文件大小限制：小于' + fileSize + 'M')
         return false
       }
-      this.loadStart('文件上传中...')
+      // this.loadStart('文件上传中...')
       return true
     },
     // [20210527][upd] 文件上传成功后触发
     handleOnSuccess(response, form, field) {
       this.$emit('on-success', response)
-      Message.success('上传成功')
-      this.loadEnd()
+      // Message.success('上传成功')
+      // this.loadEnd()
     },
     // [20210527]][cpy] 上传失败触发
     handleOnError(err, file, fileList) {
-      Message.error('上传失败')
-      this.loadEnd()
+      // Message.error('上传失败')
+      // this.loadEnd()
     },
     // [20210527][crt] 移除
     handleOnReset() {
@@ -218,7 +219,7 @@ export default {
         .substring(filePath.lastIndexOf('.') + 1)
       // 处理pdf文件遮罩层
       if (this.fileType == 'pdf' && !this.pdfPreview) {
-        this.loadStart('文件加载中...')
+        // this.loadStart('文件加载中...')
         var xhr = new XMLHttpRequest()
 
         xhr.open(
@@ -240,13 +241,13 @@ export default {
           }
         }
       } else if (this.fileType == 'pdf' && this.pdfPreview) {
-        this.loadStart('文件加载中...')
+        // this.loadStart('文件加载中...')
         this.filePreviewPath = this.pdfPreview(filePath)
       } else {
         this.filePreviewPath = filePath
       }
       this.isPreview = true
-      this.loadEnd()
+      // this.loadEnd()
     },
     // [20210527][cpy] 关闭预览
     closePreview() {

@@ -204,10 +204,9 @@ export default {
 </script>
 
 <style lang="less">
-.es-addr {
-  width: 100%;
-  .form-item {
-    position: absolute;
+.es-textarea {
+  textarea{
+    font-size: 12px;
   }
 }
 </style>
