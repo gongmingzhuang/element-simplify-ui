@@ -274,9 +274,9 @@ export default {
         this.$refs['uploads'].value = ''
       }
       // 转化为base64
-      // reader.readAsDataURL(file)
+      reader.readAsDataURL(file)
       // 转化为blob
-      reader.readAsArrayBuffer(file)
+      // reader.readAsArrayBuffer(file)
     },
 
     // 放大缩小
