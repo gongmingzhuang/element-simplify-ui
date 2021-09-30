@@ -112,7 +112,7 @@
                 <div v-html='item.render(item, form)'></div>
               </template>
               <template v-else>
-                <span>{{form[item.prop] || '-'}}</span>
+                <span>{{form[item.prop] || ''}}</span>
               </template>
             </template>
             <!-- [crt][20210715] 远程查询模糊输入 -->
@@ -144,7 +144,7 @@
                 v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
-                :clearable="item.setting && item.setting.clearable"
+                clearable
                 :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               ></el-input>
             </template>
@@ -158,7 +158,7 @@
                 v-on="{...item.setting}"
                 :placeholder="item.placeholder || '请输入' + item.label"
                 :maxlength="item.maxlength"
-                :clearable="item.setting && item.setting.clearable"
+                clearable
                 :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
               >
                 <i
@@ -189,6 +189,7 @@
                     v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
+                    clearable
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
                   />
                 </div>
@@ -213,6 +214,7 @@
                     v-on="{...item.setting}"
                     :placeholder="item.placeholder || '请输入' + item.label"
                     :maxlength="item.maxlength"
+                    clearable
                     :readonly="item.setting && item.setting.readonly || (formSetting.loadingCtrl && $props.loading)"
                   />
                 </div>
@@ -277,6 +279,7 @@
                 v-model="form[item.prop]"
                 v-bind="{...item.setting}"
                 v-on="{...item.setting}"
+                clearable
                 :placeholder="item.placeholder || '请选择'"
                 :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
                 @change="(val) => item.hasOwnProperty('changeEvent') ? item.changeEvent(val, item, form) : item.hasOwnProperty('setting') && item.setting.hasOwnProperty('changeEvent') && item.setting.changeEvent(val, item, form)"
@@ -342,6 +345,20 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+              />
+            </template>
+            <template v-if="item.type=='timerange'">
+              <el-time-picker
+                is-range
+                @change="date => {dateFormatting(date, item)}"
+                v-model="form[item.prop]"
+                v-bind="{...item.setting}"
+                v-on="{...item.setting}"
+                :disabled="item.setting && (item.setting.disabled || item.setting.readonly) || (formSetting.loadingCtrl && $props.loading)"
+                :picker-options="item.setting && item.setting.pickerOptions"
+                range-separator="至"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
               />
             </template>
             <!-- [20210714] 日期切换框 -->
@@ -663,8 +680,33 @@ export default {
               item.validate.forEach(itm => {
                 let _valid = {}
                 // [upd][20210701] 联动查询修复
+                // if (item.prop == 'totalValue') {
+                //   debugger
+                //   let dk = this.validateCustomList
+                // }
+
                 if (itm == 'v-compare' || itm == 'v-comdepend') {
                   _valid = _that.VALID_SET[itm](item, itm, _that.formColumns, _that)
+                } else if (
+                  this.validateCustomList &&
+                  this.validateCustomList.length > 0 &&
+                  ((typeof itm == 'string' &&
+                    this.validateCustomList.find(i => i.validName == itm)) ||
+                    (itm instanceof Object &&
+                      itm.hasOwnProperty('validator') &&
+                      this.validateCustomList.find(i => i.validName == itm.validator)))
+                ) {
+                  // 优先匹配自定义校验规则
+                  this.validateCustomList.forEach(vitem => {
+                    let _itm = itm
+                    if (itm instanceof Object) {
+                      _itm = itm.validator
+                    }
+                    if (_itm == vitem.validName) {
+                      _valid.validator = vitem.validator(item, this, itm)
+                      _valid.trigger = vitem.trigger || ['blur', 'change']
+                    }
+                  })
                 } else if (_that.VALID_SET.hasOwnProperty(itm)) {
                   // 默认校验
                   _valid = _that.VALID_SET[itm](item, _that.formColumns, _that)
@@ -773,9 +815,15 @@ export default {
         if (item.type != 'datetimerange') {
           this.form[item.props[1]] =
             this.$moment(date[1]).format(_valueFormat).split(' ')[0] + ' 23:59:59'
-        }else{
+        } else {
           this.form[item.props[1]] = this.$moment(date[1]).format(_valueFormat)
         }
+      }
+      // timerange
+      if (item.type == 'timerange') {
+        _valueFormat = 'HH:mm:ss'
+        this.form[item.props[0]] = this.$moment(date[0]).format(_valueFormat)
+        this.form[item.props[1]] = this.$moment(date[1]).format(_valueFormat)
       }
       // [20210714] dateRangeSwitch 增强
       // dateRangeSwitch[switch: TRUE]

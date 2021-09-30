@@ -8,14 +8,37 @@
       <!-- 遮罩层 -->
       <div class="img-layer"></div>
       <div class="img">
-        <img :src="imgSrc" />
+        <img
+          :src="imgSrc"
+          v-if="type == 'image'"
+        />
+        <video
+          v-if="imgSrc && type == 'video'"
+          :src="imgSrc"
+          class="avatar video-avatar"
+          controls="controls"
+          controlslist="nodownload noremoteplayback"
+          disablePictureInPicture
+        >
+          您的浏览器不支持视频播放
+        </video>
       </div>
     </div>
   </transition>
 </template>
 <script>
 export default {
-  props: ['imgSrc'], //接受图片地址
+  // props: ['imgSrc', 'type'], //接受图片地址
+  props: {
+    imgSrc: {
+      type: String,
+      require: true
+    },
+    type: {
+      type: String,
+      default: 'image'
+    }
+  }, //接受图片地址
   methods: {
     bigImg() {
       // 发送事件
@@ -80,15 +103,21 @@ export default {
   height: 100%;
   overflow: hidden;
 }
-/*不限制图片大小，实现居中*/
-.img-view .img img {
-  // max-width: 100%;
-  width: 100%;
-  display: block;
-  // position: absolute;
-  left: 0;
-  right: 0;
-  margin: auto;
-  z-index: 1000;
+.img-view .img {
+  /*不限制图片大小，实现居中*/
+  img {
+    // max-width: 100%;
+    width: 100%;
+    display: block;
+    // position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 1000;
+  }
+  video {
+    width: auto;
+    height: 80vh;
+  }
 }
 </style>

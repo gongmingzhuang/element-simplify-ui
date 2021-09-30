@@ -8,6 +8,7 @@
     </div>
     <el-input
       type="textarea"
+      clearable
       :maxlength="item.hasOwnProperty('maxlength') && item.maxlength || 50"
       :rows="item.hasOwnProperty('setting') && item.setting.hasOwnProperty('rows') && item.setting.rows || 2"
       :placeholder="item.hasOwnProperty('placeholder') && item.placeholder || `请输入${item.label}`"

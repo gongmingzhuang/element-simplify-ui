@@ -10,6 +10,7 @@ import EsDialogForm from "../packages/dialog-form/index"
 import EsEditForm from "../packages/edit-form/index"
 import EsForm from "../packages/form/index"
 import EsFormEx from "../packages/form-ex/index"
+import EsCloseIcon from "../packages/icon/index"
 import EsInfoForm from "../packages/info-form/index"
 import EsMenu from "../packages/menu/index"
 import EsImageGroup from "../packages/image-group/index"
@@ -17,6 +18,7 @@ import EsQuery from "../packages/query/index"
 import EsTable from "../packages/table/index"
 import EsTabs from "../packages/tabs/index"
 import EsUpload from "../packages/upload/index"
+import EsVideoUpload from "../packages/upload/video-upload"
 import 'element-ui/lib/theme-chalk/index.css'
 import '../lib/css/public.css'
 import ElementUI from 'element-ui'
@@ -35,12 +37,14 @@ const components = [
   EsForm,
   EsFormEx,
   EsInfoForm,
+  EsCloseIcon,
   EsImageGroup,
   EsMenu,
   EsQuery,
   EsTable,
   EsTabs,
-  EsUpload
+  EsUpload,
+  EsVideoUpload
 ]
 
 const install = Vue => {
@@ -71,11 +75,13 @@ export default {
   EsForm,
   EsFormEx,
   EsInfoForm,
+  EsCloseIcon,
   EsImageGroup,
   EsMenu,
   EsQuery,
   EsTable,
   EsTabs,
-  EsUpload
+  EsUpload,
+  EsVideoUpload
 }
 
